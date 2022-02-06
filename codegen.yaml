@@ -1,0 +1,10 @@
+schema: http://localhost:5002/graphql
+generates:
+  ./types/generated/index.d.ts:
+    config:
+      useIndexSignature: true
+      federation: true
+      contextType: types/context#Context
+    plugins:
+      - typescript
+      - typescript-resolvers

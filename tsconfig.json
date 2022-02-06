@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2018",
+    "outDir": "./dist",
+    "strict": true,
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "skipLibCheck": true ,
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@src/*": ["src/*"]
+    }
+  },
+  "include": [
+    "types/custom/index.d.ts",
+    "types/generated/index.d.ts",
+    "src"
+  ],
+  "exclude": ["node_modules"]
+}
