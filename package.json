@@ -1,6 +1,6 @@
 {
   "name": "@the-devoyage/graphql-users",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "dist/server.js",
   "scripts": {
@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@apollo/federation": "^0.33.8",
-    "@the-devoyage/mongo-filter-generator": "^0.1.22",
+    "@the-devoyage/mongo-filter-generator": "^0.1.23",
     "apollo-server": "^3.5.0",
     "apollo-server-express": "^3.5.0",
     "bcryptjs": "^2.4.3",
