@@ -41,7 +41,7 @@ type User @key(fields: "_id") @key(fields: "account") {
 
 ### Access Required Repositories
 
-First, be sure you have been granted instant access as a collaborator to the `@the-devoyage/graphql-users` repository by purchasing access as our [BaseTools Checkout]() page.
+First, be sure you have been granted instant access as a collaborator to the `@the-devoyage/graphql-users` repository by purchasing access as our [BaseTools Checkout](https://basetools.io/checkout/dQe81uv0) page.
 
 Clone this repo.
 
