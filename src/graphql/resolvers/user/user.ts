@@ -1,6 +1,7 @@
 import { User as UserModel } from "@src/models";
 import { User as IUser } from "types/generated";
 import { UserResolvers } from "types/generated";
+
 export const User: UserResolvers = {
   __resolveReference: async (ref: IUser) => {
     try {

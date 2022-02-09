@@ -1,4 +1,3 @@
-import { checkAuth, limitRole } from "@src/helpers";
 import { User } from "@src/models";
 import { Validate } from "@src/validate";
 import { UserInputError } from "apollo-server-express";
@@ -6,16 +5,16 @@ import { UpdateQuery } from "mongoose";
 import { MutationResolvers, User as IUser } from "types/generated";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { isHttpQueryError } from "apollo-server-core";
+import { Helpers } from "@the-devoyage/micro-auth-helpers";
 
 export const Mutation: MutationResolvers = {
   loginUser: async (_, args, context) => {
     try {
-      checkAuth({ context });
+      Helpers.Resolver.CheckAuth({ context });
 
       const user = await User.findOne<IUser>({
         _id: args.loginUserInput._id,
-        account: context.token.account?._id,
+        account: context.auth.decodedToken?.account?._id,
       });
 
       if (!user) {
@@ -35,13 +34,14 @@ export const Mutation: MutationResolvers = {
       }
 
       if (
-        user.account._id.toString() !== context.token.account?._id.toString()
+        user.account._id.toString() !==
+        context.auth.decodedToken?.account?._id.toString()
       ) {
         throw new Error("User does not belong to this account.");
       }
 
       const payload = {
-        account: context.token.account,
+        account: context.auth.decodedToken?.account,
         user: { _id: user._id, role: user.role },
       };
 
@@ -74,35 +74,41 @@ export const Mutation: MutationResolvers = {
   createUser: async (_parent, args, context) => {
     const { errors, isValid } = Validate.User.CreateUser(args.createUserInput);
     try {
-      checkAuth({ context });
+      Helpers.Resolver.CheckAuth({ context });
 
       if (!isValid) {
         throw new UserInputError("Invalid data.", { errors });
       }
 
       if (args.createUserInput.account) {
-        if (args.createUserInput.account !== context.token.account?._id) {
-          checkAuth({ context, requireUser: true });
-          limitRole(
-            context.token.user?.role,
-            1,
-            "You may not add users to an account that is not your own."
-          );
+        if (
+          args.createUserInput.account !==
+          context.auth.decodedToken?.account?._id
+        ) {
+          Helpers.Resolver.CheckAuth({ context, requireUser: true });
+          Helpers.Resolver.LimitRole({
+            userRole: context.auth.decodedToken?.user?.role,
+            roleLimit: 1,
+            errorMessage:
+              "You may not add users to an account that is not your own.",
+          });
         }
       }
 
       const accountHasUsers = await User.countDocuments({
-        account: context.token.account?._id,
+        account: context.auth.decodedToken?.account?._id,
       });
 
       const created_by: string | undefined =
-        context.token.user?._id ?? undefined;
+        context.auth.decodedToken?.user?._id ?? undefined;
       const role = accountHasUsers ? 100 : 10;
 
       const newUser = new User({
         ...args.createUserInput,
         role,
-        account: args.createUserInput.account ?? context.token.account?._id,
+        account:
+          args.createUserInput.account ??
+          context.auth.decodedToken?.account?._id,
         created_by,
       });
 
@@ -126,7 +132,7 @@ export const Mutation: MutationResolvers = {
     const { errors, isValid } = Validate.User.UpdateUser(args.updateUserInput);
 
     try {
-      checkAuth({ context });
+      Helpers.Resolver.CheckAuth({ context });
 
       if (!isValid) {
         throw new UserInputError("Invalid data.", { errors });
@@ -141,14 +147,15 @@ export const Mutation: MutationResolvers = {
       if (
         args.updateUserInput.role &&
         args.updateUserInput.role < 10 &&
-        args.updateUserInput.account !== context.token.account?._id
+        args.updateUserInput.account !== context.auth.decodedToken?.account?._id
       ) {
-        checkAuth({ context, requireUser: true });
-        limitRole(
-          context.token.user?.role,
-          1,
-          "Only admins can manage external accounts and admin level roles."
-        );
+        Helpers.Resolver.CheckAuth({ context, requireUser: true });
+        Helpers.Resolver.LimitRole({
+          userRole: context.auth.decodedToken?.user?.role,
+          roleLimit: 1,
+          errorMessage:
+            "Only admins can manage external accounts and admin level roles.",
+        });
       }
 
       const updateQuery = { ...args.updateUserInput };
@@ -173,7 +180,7 @@ export const Mutation: MutationResolvers = {
     const { isValid, errors } = Validate.User.DeleteUser(args.deleteUserInput);
 
     try {
-      checkAuth({ context, requireUser: true });
+      Helpers.Resolver.CheckAuth({ context, requireUser: true });
 
       if (!isValid) {
         throw new UserInputError("Invalid data.", { errors });
@@ -184,10 +191,13 @@ export const Mutation: MutationResolvers = {
       });
 
       const userBelongsToAccount =
-        user?.account._id === context.token.account?._id;
+        user?.account._id === context.auth.decodedToken?.account?._id;
 
       if (!userBelongsToAccount) {
-        limitRole(context.token.user?.role, 1);
+        Helpers.Resolver.LimitRole({
+          userRole: context.auth.decodedToken?.user?.role,
+          roleLimit: 1,
+        });
       }
 
       if (!user) {
