@@ -3,7 +3,7 @@ import { User } from "@src/models";
 import bcrypt from "bcryptjs";
 import { AccountResolvers, User as IUser } from "types/generated";
 import jwt from "jsonwebtoken";
-import { TokenContext } from "types/context";
+import { Context, DecodedToken } from "@the-devoyage/micro-auth-helpers";
 
 export const Account: AccountResolvers = {
   loginUser: async (account, args) => {
@@ -35,7 +35,7 @@ export const Account: AccountResolvers = {
         }
       }
 
-      const payload: TokenContext = {
+      const payload: DecodedToken = {
         account: {
           _id: account._id,
           email: account.email,

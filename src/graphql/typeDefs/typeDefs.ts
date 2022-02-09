@@ -1,3 +1,5 @@
-import { UserTypes } from "./user";
+import { User } from "./user";
+import { Media } from "./media";
+import { Account } from "./account";
 
-export const typeDefs = UserTypes;
+export const typeDefs = { User, Account, Media };

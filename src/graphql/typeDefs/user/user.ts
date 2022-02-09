@@ -1,6 +1,6 @@
 import { gql } from "apollo-server-express";
 
-export const UserTypes = gql`
+export const User = gql`
   type User @key(fields: "_id") @key(fields: "account") {
     _id: ObjectID!
     first_name: String
@@ -17,19 +17,6 @@ export const UserTypes = gql`
     updatedAt: DateTime!
     account: Account!
     role: Int!
-  }
-
-  extend type Media @key(fields: "_id") {
-    _id: ObjectID! @external
-  }
-
-  extend type Account @key(fields: "_id") {
-    _id: ObjectID! @external
-    email: String! @external
-    loginUser(loginUserInput: LoginUserInput): LoginUserResponse
-      @requires(fields: "_id email")
-    users(getUsersInput: GetUsersInput!): GetUsersResponse
-      @requires(fields: "_id")
   }
 
   type Address {

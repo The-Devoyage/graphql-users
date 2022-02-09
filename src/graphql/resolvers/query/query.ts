@@ -1,15 +1,15 @@
 import { GenerateMongo } from "@the-devoyage/mongo-filter-generator";
-import { checkAuth } from "@src/helpers";
 import { User } from "@src/models";
 import { QueryResolvers, User as IUser } from "types/generated";
+import { Helpers } from "@the-devoyage/micro-auth-helpers";
 
 export const Query: QueryResolvers = {
   me: async (_parent, _args, context) => {
     try {
-      checkAuth({ context, requireUser: true });
-      const me = await User.findOne({ _id: context.token.user?._id }).select(
-        "-password"
-      );
+      Helpers.Resolver.CheckAuth({ context, requireUser: true });
+      const me = await User.findOne({
+        _id: context.auth.decodedToken?.user?._id,
+      }).select("-password");
       if (!me) {
         throw new Error("User can not be found.");
       }
@@ -21,7 +21,7 @@ export const Query: QueryResolvers = {
   },
   getUsers: async (_parent, args, context) => {
     try {
-      checkAuth({ context });
+      Helpers.Resolver.CheckAuth({ context });
 
       const { filters, options } = GenerateMongo({
         fieldFilters: args.getUsersInput,
