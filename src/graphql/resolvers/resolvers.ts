@@ -5,7 +5,7 @@ import { Mutation } from "./mutation";
 import { User } from "./user";
 
 export const resolvers: Resolvers = {
-  Account,
+  Account: { Account },
   User: {
     Query,
     Mutation,
