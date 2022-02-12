@@ -2,8 +2,7 @@ import { GenerateMongo } from "@the-devoyage/mongo-filter-generator";
 import { User } from "@src/models";
 import bcrypt from "bcryptjs";
 import { AccountResolvers, User as IUser } from "types/generated";
-import jwt from "jsonwebtoken";
-import { DecodedToken } from "@the-devoyage/micro-auth-helpers";
+import { Helpers } from "@the-devoyage/micro-auth-helpers";
 
 export const Account: AccountResolvers = {
   loginUser: async (account, args) => {
@@ -35,17 +34,17 @@ export const Account: AccountResolvers = {
         }
       }
 
-      const payload: DecodedToken = {
-        account: {
-          _id: account._id,
-          email: account.email,
-        },
-        user: { _id: user._id, role: user.role, email: user.email },
-      };
-
       if (process.env.JWT_ENCRYPTION_KEY) {
-        const token = jwt.sign(payload, process.env.JWT_ENCRYPTION_KEY, {
-          expiresIn: "10h",
+        const token = Helpers.Resolver.GenerateToken({
+          payload: {
+            account: {
+              _id: account._id,
+              email: account.email,
+            },
+            user: { _id: user._id, role: user.role, email: user.email },
+          },
+          secretOrPublicKey: process.env.JWT_ENCRYPTION_KEY,
+          options: { expiresIn: "10h" },
         });
 
         if (token) {

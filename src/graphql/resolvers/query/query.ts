@@ -8,7 +8,7 @@ export const Query: QueryResolvers = {
     try {
       Helpers.Resolver.CheckAuth({ context, requireUser: true });
       const me = await User.findOne({
-        _id: context.auth.decodedToken?.user?._id,
+        _id: context.auth.payload.user?._id,
       }).select("-password");
       if (!me) {
         throw new Error("User can not be found.");

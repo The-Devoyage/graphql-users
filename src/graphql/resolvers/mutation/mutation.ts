@@ -4,7 +4,6 @@ import { UserInputError } from "apollo-server-express";
 import { UpdateQuery } from "mongoose";
 import { MutationResolvers, User as IUser } from "types/generated";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import { Helpers } from "@the-devoyage/micro-auth-helpers";
 
 export const Mutation: MutationResolvers = {
@@ -14,7 +13,7 @@ export const Mutation: MutationResolvers = {
 
       const user = await User.findOne<IUser>({
         _id: args.loginUserInput._id,
-        account: context.auth.decodedToken?.account?._id,
+        account: context.auth.payload?.account?._id,
       });
 
       if (!user) {
@@ -35,19 +34,19 @@ export const Mutation: MutationResolvers = {
 
       if (
         user.account._id.toString() !==
-        context.auth.decodedToken?.account?._id.toString()
+        context.auth.payload?.account?._id.toString()
       ) {
         throw new Error("User does not belong to this account.");
       }
 
-      const payload = {
-        account: context.auth.decodedToken?.account,
-        user: { _id: user._id, role: user.role },
-      };
-
       if (process.env.JWT_ENCRYPTION_KEY) {
-        const token = jwt.sign(payload, process.env.JWT_ENCRYPTION_KEY, {
-          expiresIn: "10h",
+        const token = Helpers.Resolver.GenerateToken({
+          payload: {
+            account: context.auth.payload.account,
+            user: { _id: user._id, role: user.role, email: user.email },
+          },
+          secretOrPublicKey: process.env.JWT_ENCRYPTION_KEY,
+          options: { expiresIn: "10h" },
         });
 
         if (token) {
@@ -82,12 +81,11 @@ export const Mutation: MutationResolvers = {
 
       if (args.createUserInput.account) {
         if (
-          args.createUserInput.account !==
-          context.auth.decodedToken?.account?._id
+          args.createUserInput.account !== context.auth.payload?.account?._id
         ) {
           Helpers.Resolver.CheckAuth({ context, requireUser: true });
           Helpers.Resolver.LimitRole({
-            userRole: context.auth.decodedToken?.user?.role,
+            userRole: context.auth.payload?.user?.role,
             roleLimit: 1,
             errorMessage:
               "You may not add users to an account that is not your own.",
@@ -96,19 +94,18 @@ export const Mutation: MutationResolvers = {
       }
 
       const accountHasUsers = await User.countDocuments({
-        account: context.auth.decodedToken?.account?._id,
+        account: context.auth.payload?.account?._id,
       });
 
       const created_by: string | undefined =
-        context.auth.decodedToken?.user?._id ?? undefined;
+        context.auth.payload?.user?._id ?? undefined;
       const role = accountHasUsers ? 100 : 10;
 
       const newUser = new User({
         ...args.createUserInput,
         role,
         account:
-          args.createUserInput.account ??
-          context.auth.decodedToken?.account?._id,
+          args.createUserInput.account ?? context.auth.payload?.account?._id,
         created_by,
       });
 
@@ -147,11 +144,11 @@ export const Mutation: MutationResolvers = {
       if (
         args.updateUserInput.role &&
         args.updateUserInput.role < 10 &&
-        args.updateUserInput.account !== context.auth.decodedToken?.account?._id
+        args.updateUserInput.account !== context.auth.payload?.account?._id
       ) {
         Helpers.Resolver.CheckAuth({ context, requireUser: true });
         Helpers.Resolver.LimitRole({
-          userRole: context.auth.decodedToken?.user?.role,
+          userRole: context.auth.payload?.user?.role,
           roleLimit: 1,
           errorMessage:
             "Only admins can manage external accounts and admin level roles.",
@@ -191,11 +188,11 @@ export const Mutation: MutationResolvers = {
       });
 
       const userBelongsToAccount =
-        user?.account._id === context.auth.decodedToken?.account?._id;
+        user?.account._id === context.auth.payload?.account?._id;
 
       if (!userBelongsToAccount) {
         Helpers.Resolver.LimitRole({
-          userRole: context.auth.decodedToken?.user?.role,
+          userRole: context.auth.payload?.user?.role,
           roleLimit: 1,
         });
       }
