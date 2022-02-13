@@ -1,11 +1,11 @@
 {
   "name": "@the-devoyage/graphql-users",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "",
   "main": "dist/server.js",
   "scripts": {
-    "start": "node dist/server.js",
-    "dev": "tsc -w & nodemon dist/server.js",
+    "start": "tsc; node dist/server.js",
+    "dev": "tsc; tsc -w & nodemon dist/server.js",
     "build": "tsc",
     "generate": "graphql-codegen"
   },
