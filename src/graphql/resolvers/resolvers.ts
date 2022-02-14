@@ -5,10 +5,8 @@ import { Mutation } from "./mutation";
 import { User } from "./user";
 
 export const resolvers: Resolvers = {
-  Account: { Account },
-  User: {
-    Query,
-    Mutation,
-    User,
-  },
+  Account,
+  Query,
+  Mutation,
+  User,
 };

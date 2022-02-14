@@ -92,16 +92,4 @@ export const User = gql`
     user: User!
     token: String!
   }
-
-  extend type Query {
-    getUsers(getUsersInput: GetUsersInput!): GetUsersResponse!
-    me: User!
-  }
-
-  extend type Mutation {
-    loginUser(loginUserInput: LoginUserInput!): LoginUserResponse!
-    updateUser(updateUserInput: UpdateUserInput!): User!
-    createUser(createUserInput: CreateUserInput!): User!
-    deleteUser(deleteUserInput: DeleteUserInput!): User!
-  }
 `;

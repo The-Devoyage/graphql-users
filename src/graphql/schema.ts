@@ -7,5 +7,7 @@ export const schema = buildSubgraphSchema([
   { typeDefs: typeDefs.User, resolvers: resolvers.User },
   { typeDefs: GraphQL.typeDefs, resolvers: GraphQL.resolvers },
   { typeDefs: typeDefs.Account, resolvers: resolvers.Account },
+  { typeDefs: typeDefs.Query, resolvers: resolvers.Query },
+  { typeDefs: typeDefs.Mutation, resolvers: resolvers.Mutation },
   { typeDefs: typeDefs.Media },
 ]);
