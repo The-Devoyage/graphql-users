@@ -6,7 +6,7 @@ export const Mutation = gql`
     first_name: String
     last_name: String
     phone: String
-    profile_img: ID
+    image: ID
     account: ID
     role: Int
   }
@@ -16,7 +16,7 @@ export const Mutation = gql`
     phone: String
     last_name: String
     first_name: String
-    profile_img: ObjectID
+    image: ObjectID
     _id: ObjectID!
     address: AddressInput
     image: ObjectID
