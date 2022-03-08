@@ -15,16 +15,19 @@ const apolloServer = new ApolloServer({
   context: ({ req }) => Helpers.Subgraph.GenerateContext({ req }),
 });
 
-let DB = process.env.MONGO_URI!;
-mongoose
-  .connect(DB, {
-    useUnifiedTopology: true,
-    useNewUrlParser: true,
-    useCreateIndex: true,
-    useFindAndModify: false,
-  })
-  .then(() => console.log("Mongo DB Connected..."))
-  .catch((err) => console.log(err));
+const DB = process.env.MONGO_URI;
+
+if (DB) {
+  mongoose
+    .connect(DB, {
+      useUnifiedTopology: true,
+      useNewUrlParser: true,
+      useCreateIndex: true,
+      useFindAndModify: false,
+    })
+    .then(() => console.log("Mongo DB Connected..."))
+    .catch((err) => console.log(err));
+}
 
 const port = process.env.BACKEND_PORT || 5002;
 

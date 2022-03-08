@@ -1,6 +1,4 @@
 import { User } from "@src/models";
-import { Validate } from "@src/validate";
-import { UserInputError } from "apollo-server-express";
 import { UpdateQuery } from "mongoose";
 import { MutationResolvers, User as IUser } from "types/generated";
 import bcrypt from "bcryptjs";
@@ -71,13 +69,8 @@ export const Mutation: MutationResolvers = {
     }
   },
   createUser: async (_parent, args, context) => {
-    const { errors, isValid } = Validate.User.CreateUser(args.createUserInput);
     try {
       Helpers.Resolver.CheckAuth({ context });
-
-      if (!isValid) {
-        throw new UserInputError("Invalid data.", { errors });
-      }
 
       if (args.createUserInput.account) {
         if (
@@ -99,7 +92,18 @@ export const Mutation: MutationResolvers = {
 
       const created_by: string | undefined =
         context.auth.payload?.user?._id ?? undefined;
-      const role = accountHasUsers ? 100 : 10;
+
+      if (args.createUserInput.role && args.createUserInput.role < 10) {
+        Helpers.Resolver.CheckAuth({ context, requireUser: true });
+        Helpers.Resolver.LimitRole({
+          userRole: context.auth.payload.user?.role,
+          roleLimit: 1,
+          errorMessage:
+            "You do not have permission to add a role of this level.",
+        });
+      }
+
+      const role = args.createUserInput.role ?? accountHasUsers ? 100 : 10;
 
       const newUser = new User({
         ...args.createUserInput,
@@ -126,14 +130,8 @@ export const Mutation: MutationResolvers = {
     }
   },
   updateUser: async (_parent, args, context) => {
-    const { errors, isValid } = Validate.User.UpdateUser(args.updateUserInput);
-
     try {
       Helpers.Resolver.CheckAuth({ context });
-
-      if (!isValid) {
-        throw new UserInputError("Invalid data.", { errors });
-      }
 
       const user = await User.findOne<IUser>({ _id: args.updateUserInput._id });
 
@@ -141,11 +139,7 @@ export const Mutation: MutationResolvers = {
         throw new Error("User does not exist.");
       }
 
-      if (
-        args.updateUserInput.role &&
-        args.updateUserInput.role < 10 &&
-        args.updateUserInput.account !== context.auth.payload?.account?._id
-      ) {
+      if (args.updateUserInput.role && args.updateUserInput.role < 10) {
         Helpers.Resolver.CheckAuth({ context, requireUser: true });
         Helpers.Resolver.LimitRole({
           userRole: context.auth.payload?.user?.role,
@@ -174,14 +168,8 @@ export const Mutation: MutationResolvers = {
     }
   },
   deleteUser: async (_parent, args, context) => {
-    const { isValid, errors } = Validate.User.DeleteUser(args.deleteUserInput);
-
     try {
       Helpers.Resolver.CheckAuth({ context, requireUser: true });
-
-      if (!isValid) {
-        throw new UserInputError("Invalid data.", { errors });
-      }
 
       const user = await User.findOne<IUser>({
         _id: args.deleteUserInput._id,

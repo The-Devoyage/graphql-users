@@ -81,6 +81,7 @@ export type CreateUserInput = {
   last_name?: InputMaybe<Scalars['String']>;
   phone?: InputMaybe<Scalars['String']>;
   profile_img?: InputMaybe<Scalars['ID']>;
+  role?: InputMaybe<Scalars['Int']>;
 };
 
 export type DeleteUserInput = {
@@ -242,6 +243,7 @@ export type UpdateUserInput = {
 export type User = {
   __typename?: 'User';
   _id: Scalars['ObjectID'];
+  about?: Maybe<Scalars['String']>;
   account: Account;
   address?: Maybe<Address>;
   createdAt: Scalars['DateTime'];
@@ -475,6 +477,7 @@ export type StatsResolvers<ContextType = Context, ParentType extends ResolversPa
 
 export type UserResolvers<ContextType = Context, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = ResolversObject<{
   _id?: Resolver<ResolversTypes['ObjectID'], ParentType, ContextType>;
+  about?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   account?: Resolver<ResolversTypes['Account'], ParentType, ContextType>;
   address?: Resolver<Maybe<ResolversTypes['Address']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;

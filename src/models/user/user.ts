@@ -55,6 +55,10 @@ const UserSchema = new Schema<User, FindAndPaginateModel>(
       type: Schema.Types.ObjectId,
       required: true,
     },
+    about: {
+      type: String,
+      required: false,
+    },
   },
   { timestamps: true }
 );
