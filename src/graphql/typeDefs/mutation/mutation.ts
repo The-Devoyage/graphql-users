@@ -16,7 +16,6 @@ export const Mutation = gql`
     phone: String
     last_name: String
     first_name: String
-    image: ObjectID
     _id: ObjectID!
     address: AddressInput
     image: ObjectID
