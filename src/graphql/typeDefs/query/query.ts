@@ -11,6 +11,7 @@ export const Query = gql`
     phone: StringFieldFilter
     config: FilterConfig
     image: StringFieldFilter
+    role: IntFieldFilter
   }
 
   type GetUsersResponse {

@@ -103,6 +103,7 @@ export type GetUsersInput = {
   image?: InputMaybe<StringFieldFilter>;
   last_name?: InputMaybe<StringFieldFilter>;
   phone?: InputMaybe<StringFieldFilter>;
+  role?: InputMaybe<IntFieldFilter>;
 };
 
 export type GetUsersResponse = {
