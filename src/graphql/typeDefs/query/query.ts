@@ -15,8 +15,8 @@ export const Query = gql`
   }
 
   type GetUsersResponse {
-    data: [User]
-    stats: Stats
+    data: [User!]!
+    stats: Stats!
   }
 
   extend type Query {
