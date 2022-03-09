@@ -23,7 +23,7 @@ export type Account = {
   _id: Scalars['ObjectID'];
   email: Scalars['String'];
   loginUser?: Maybe<LoginUserResponse>;
-  users?: Maybe<GetUsersResponse>;
+  users: GetUsersResponse;
 };
 
 
@@ -78,9 +78,9 @@ export type CreateUserInput = {
   account?: InputMaybe<Scalars['ID']>;
   email: Scalars['String'];
   first_name?: InputMaybe<Scalars['String']>;
+  image?: InputMaybe<Scalars['ID']>;
   last_name?: InputMaybe<Scalars['String']>;
   phone?: InputMaybe<Scalars['String']>;
-  profile_img?: InputMaybe<Scalars['ID']>;
   role?: InputMaybe<Scalars['Int']>;
 };
 
@@ -108,8 +108,8 @@ export type GetUsersInput = {
 
 export type GetUsersResponse = {
   __typename?: 'GetUsersResponse';
-  data?: Maybe<Array<Maybe<User>>>;
-  stats?: Maybe<Stats>;
+  data: Array<User>;
+  stats: Stats;
 };
 
 export type IntArrayFilter = {
@@ -237,7 +237,6 @@ export type UpdateUserInput = {
   image?: InputMaybe<Scalars['ObjectID']>;
   last_name?: InputMaybe<Scalars['String']>;
   phone?: InputMaybe<Scalars['String']>;
-  profile_img?: InputMaybe<Scalars['ObjectID']>;
   role?: InputMaybe<Scalars['Int']>;
 };
 
@@ -416,7 +415,7 @@ export type AccountResolvers<ContextType = Context, ParentType extends Resolvers
   _id?: Resolver<ResolversTypes['ObjectID'], ParentType, ContextType>;
   email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   loginUser?: Resolver<Maybe<ResolversTypes['LoginUserResponse']>, ParentType, ContextType, RequireFields<AccountLoginUserArgs, never>>;
-  users?: Resolver<Maybe<ResolversTypes['GetUsersResponse']>, ParentType, ContextType, RequireFields<AccountUsersArgs, 'getUsersInput'>>;
+  users?: Resolver<ResolversTypes['GetUsersResponse'], ParentType, ContextType, RequireFields<AccountUsersArgs, 'getUsersInput'>>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -434,8 +433,8 @@ export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversT
 }
 
 export type GetUsersResponseResolvers<ContextType = Context, ParentType extends ResolversParentTypes['GetUsersResponse'] = ResolversParentTypes['GetUsersResponse']> = ResolversObject<{
-  data?: Resolver<Maybe<Array<Maybe<ResolversTypes['User']>>>, ParentType, ContextType>;
-  stats?: Resolver<Maybe<ResolversTypes['Stats']>, ParentType, ContextType>;
+  data?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType>;
+  stats?: Resolver<ResolversTypes['Stats'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
