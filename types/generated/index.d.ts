@@ -75,6 +75,7 @@ export enum BooleanFilterByEnum {
 }
 
 export type CreateUserInput = {
+  about?: InputMaybe<Scalars['String']>;
   account?: InputMaybe<Scalars['ID']>;
   email: Scalars['String'];
   first_name?: InputMaybe<Scalars['String']>;
@@ -230,6 +231,7 @@ export enum StringFilterByEnum {
 
 export type UpdateUserInput = {
   _id: Scalars['ObjectID'];
+  about?: InputMaybe<Scalars['String']>;
   account?: InputMaybe<Scalars['ObjectID']>;
   address?: InputMaybe<AddressInput>;
   email?: InputMaybe<Scalars['String']>;
