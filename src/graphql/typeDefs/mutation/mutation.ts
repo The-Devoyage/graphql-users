@@ -9,6 +9,7 @@ export const Mutation = gql`
     image: ID
     account: ID
     role: Int
+    about: String
   }
 
   input UpdateUserInput {
@@ -21,6 +22,7 @@ export const Mutation = gql`
     image: ObjectID
     role: Int
     account: ObjectID
+    about: String
   }
 
   input AddressInput {
