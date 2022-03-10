@@ -23,12 +23,12 @@ export const Query: QueryResolvers = {
     try {
       Helpers.Resolver.CheckAuth({ context });
 
-      const { filters, options } = GenerateMongo({
+      const { filter, options } = GenerateMongo({
         fieldFilters: args.getUsersInput,
         config: args.getUsersInput.config,
       });
 
-      const users = await User.findAndPaginate<IUser>(filters, options);
+      const users = await User.findAndPaginate<IUser>(filter, options);
 
       return users;
     } catch (error) {

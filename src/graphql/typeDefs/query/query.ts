@@ -5,7 +5,7 @@ export const Query = gql`
     created_by: StringFieldFilter
     email: StringFieldFilter
     _id: StringFieldFilter
-    account: StringArrayFilter
+    account: StringArrayFieldFilter
     first_name: StringFieldFilter
     last_name: StringFieldFilter
     phone: StringFieldFilter

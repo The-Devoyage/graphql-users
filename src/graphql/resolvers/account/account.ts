@@ -68,10 +68,9 @@ export const Account: AccountResolvers = {
   },
   users: async (account, args) => {
     try {
-      const { filters, options } = GenerateMongo({
+      const { filter, options } = GenerateMongo({
         fieldFilters: args.getUsersInput,
         config: {
-          operator: "AND",
           pagination: args.getUsersInput.config?.pagination,
         },
         fieldRules: [
@@ -80,12 +79,13 @@ export const Account: AccountResolvers = {
             fieldFilter: {
               string: account._id,
               filterBy: "OBJECTID",
+              operator: "AND",
             },
           },
         ],
       });
 
-      const users = await User.findAndPaginate<IUser>(filters, options);
+      const users = await User.findAndPaginate<IUser>(filter, options);
 
       return users;
     } catch (error) {
