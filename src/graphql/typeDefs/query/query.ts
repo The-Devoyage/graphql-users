@@ -2,16 +2,18 @@ import { gql } from "apollo-server-express";
 
 export const Query = gql`
   input GetUsersInput {
-    created_by: StringFieldFilter
-    email: StringFieldFilter
-    _id: StringFieldFilter
-    account: StringArrayFieldFilter
-    first_name: StringFieldFilter
-    last_name: StringFieldFilter
-    phone: StringFieldFilter
+    created_by: [StringFieldFilter]
+    email: [StringFieldFilter]
+    _id: [StringFieldFilter]
+    account: [StringArrayFieldFilter]
+    first_name: [StringFieldFilter]
+    last_name: [StringFieldFilter]
+    phone: [StringFieldFilter]
     config: FilterConfig
-    image: StringFieldFilter
-    role: IntFieldFilter
+    image: [StringFieldFilter]
+    role: [IntFieldFilter]
+    createdAt: [DateFieldFilter]
+    updatedAt: [DateFieldFilter]
   }
 
   type GetUsersResponse {

@@ -58,15 +58,10 @@ export enum ArrayFilterByEnum {
   Nin = 'NIN'
 }
 
-export type BooleanArrayFilter = {
-  arrayOptions: ArrayFilterByEnum;
-  bool: Scalars['Boolean'];
-  filterBy: BooleanFilterByEnum;
-};
-
 export type BooleanFieldFilter = {
   bool: Scalars['Boolean'];
   filterBy: BooleanFilterByEnum;
+  operator?: InputMaybe<OperatorFieldConfigEnum>;
 };
 
 export enum BooleanFilterByEnum {
@@ -90,13 +85,12 @@ export type DeleteUserInput = {
 };
 
 export type FilterConfig = {
-  operator?: InputMaybe<OperatorFieldConfigEnum>;
   pagination?: InputMaybe<Pagination>;
 };
 
 export type GetUsersInput = {
   _id?: InputMaybe<StringFieldFilter>;
-  account?: InputMaybe<StringArrayFilter>;
+  account?: InputMaybe<StringArrayFieldFilter>;
   config?: InputMaybe<FilterConfig>;
   created_by?: InputMaybe<StringFieldFilter>;
   email?: InputMaybe<StringFieldFilter>;
@@ -113,15 +107,10 @@ export type GetUsersResponse = {
   stats: Stats;
 };
 
-export type IntArrayFilter = {
-  arrayOptions: ArrayFilterByEnum;
-  filterBy: IntFilterByEnum;
-  int: Scalars['Int'];
-};
-
 export type IntFieldFilter = {
   filterBy: IntFilterByEnum;
   int: Scalars['Int'];
+  operator?: InputMaybe<OperatorFieldConfigEnum>;
 };
 
 export enum IntFilterByEnum {
@@ -212,14 +201,16 @@ export type Stats = {
   total?: Maybe<Scalars['Int']>;
 };
 
-export type StringArrayFilter = {
+export type StringArrayFieldFilter = {
   arrayOptions: ArrayFilterByEnum;
   filterBy: StringFilterByEnum;
+  operator?: InputMaybe<OperatorFieldConfigEnum>;
   string: Array<Scalars['String']>;
 };
 
 export type StringFieldFilter = {
   filterBy: StringFilterByEnum;
+  operator?: InputMaybe<OperatorFieldConfigEnum>;
   string: Scalars['String'];
 };
 
@@ -337,7 +328,6 @@ export type ResolversTypes = ResolversObject<{
   AddressInput: AddressInput;
   ArrayFilterByEnum: ArrayFilterByEnum;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
-  BooleanArrayFilter: BooleanArrayFilter;
   BooleanFieldFilter: BooleanFieldFilter;
   BooleanFilterByEnum: BooleanFilterByEnum;
   CreateUserInput: CreateUserInput;
@@ -348,7 +338,6 @@ export type ResolversTypes = ResolversObject<{
   GetUsersResponse: ResolverTypeWrapper<GetUsersResponse>;
   ID: ResolverTypeWrapper<Scalars['ID']>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
-  IntArrayFilter: IntArrayFilter;
   IntFieldFilter: IntFieldFilter;
   IntFilterByEnum: IntFilterByEnum;
   LoginUserCredentialsInput: LoginUserCredentialsInput;
@@ -362,7 +351,7 @@ export type ResolversTypes = ResolversObject<{
   Query: ResolverTypeWrapper<{}>;
   Stats: ResolverTypeWrapper<Stats>;
   String: ResolverTypeWrapper<Scalars['String']>;
-  StringArrayFilter: StringArrayFilter;
+  StringArrayFieldFilter: StringArrayFieldFilter;
   StringFieldFilter: StringFieldFilter;
   StringFilterByEnum: StringFilterByEnum;
   UpdateUserInput: UpdateUserInput;
@@ -378,7 +367,6 @@ export type ResolversParentTypes = ResolversObject<{
   Address: Address;
   AddressInput: AddressInput;
   Boolean: Scalars['Boolean'];
-  BooleanArrayFilter: BooleanArrayFilter;
   BooleanFieldFilter: BooleanFieldFilter;
   CreateUserInput: CreateUserInput;
   DateTime: Scalars['DateTime'];
@@ -388,7 +376,6 @@ export type ResolversParentTypes = ResolversObject<{
   GetUsersResponse: GetUsersResponse;
   ID: Scalars['ID'];
   Int: Scalars['Int'];
-  IntArrayFilter: IntArrayFilter;
   IntFieldFilter: IntFieldFilter;
   LoginUserCredentialsInput: LoginUserCredentialsInput;
   LoginUserInput: LoginUserInput;
@@ -400,7 +387,7 @@ export type ResolversParentTypes = ResolversObject<{
   Query: {};
   Stats: Stats;
   String: Scalars['String'];
-  StringArrayFilter: StringArrayFilter;
+  StringArrayFieldFilter: StringArrayFieldFilter;
   StringFieldFilter: StringFieldFilter;
   UpdateUserInput: UpdateUserInput;
   User: User;
