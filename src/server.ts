@@ -22,6 +22,8 @@ if (DB) {
     .connect(DB)
     .then(() => console.log("Mongo DB Connected..."))
     .catch((err) => console.log(err));
+} else {
+  console.log("Mongo URI Not provided, failed to connect to DB.");
 }
 
 const port = process.env.BACKEND_PORT || 5002;
