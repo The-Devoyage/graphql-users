@@ -7,7 +7,7 @@ export const Query: QueryResolvers = {
   me: async (_parent, _args, context) => {
     try {
       Helpers.Resolver.CheckAuth({ context, requireUser: true });
-      const me = await User.findOne({
+      const me = await User.findOne<IUser>({
         _id: context.auth.payload.user?._id,
       }).select("-password");
       if (!me) {

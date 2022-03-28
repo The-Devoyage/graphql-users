@@ -48,7 +48,7 @@ export const Account: AccountResolvers = {
         });
 
         if (token) {
-          const verifiedUser = await User.findOne({
+          const verifiedUser = await User.findOne<IUser>({
             _id: user._id,
           }).select("-password");
           if (!verifiedUser) {

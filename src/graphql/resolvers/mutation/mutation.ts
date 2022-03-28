@@ -48,7 +48,7 @@ export const Mutation: MutationResolvers = {
         });
 
         if (token) {
-          const verifiedUser = await User.findOne({
+          const verifiedUser = await User.findOne<IUser>({
             _id: user._id,
           }).select("-password");
 
@@ -115,7 +115,7 @@ export const Mutation: MutationResolvers = {
 
       await newUser.save();
 
-      const user = await User.findOne({ _id: newUser._id });
+      const user = await User.findOne<IUser>({ _id: newUser._id });
 
       if (!user) {
         throw new Error(
@@ -151,7 +151,7 @@ export const Mutation: MutationResolvers = {
 
       const updateQuery = { ...args.updateUserInput };
 
-      const updatedUser = await User.findOneAndUpdate(
+      const updatedUser = await User.findOneAndUpdate<IUser>(
         { _id: args.updateUserInput._id },
         updateQuery as UpdateQuery<typeof User>,
         { new: true }
