@@ -81,6 +81,7 @@ export const Account: AccountResolvers = {
               filterBy: "OBJECTID",
               operator: "AND",
             },
+            action: "OVERRIDE"
           },
         ],
       });
