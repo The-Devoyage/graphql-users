@@ -103,7 +103,11 @@ export const Mutation: MutationResolvers = {
         });
       }
 
-      const role = args.createUserInput.role ?? accountHasUsers ? 100 : 10;
+      const role = args.createUserInput.role
+        ? args.createUserInput.role
+        : accountHasUsers
+        ? 100
+        : 10;
 
       const newUser = new User({
         ...args.createUserInput,
