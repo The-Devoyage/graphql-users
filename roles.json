@@ -1,0 +1,16 @@
+{
+  "createUser": {
+    "disabled": false,
+    "roleLimit": 10,
+    "defaultRole": 10
+  },
+  "updateUser": {
+    "disabled": false,
+    "roleLimit": 10,
+    "errorMessage": "You do not have permission to edit user details.",
+    "": {
+      "roleLimit": 1,
+      "errorMessage": "You do not have permission to create a user."
+    }
+  }
+}

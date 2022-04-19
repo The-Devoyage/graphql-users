@@ -1,66 +1,48 @@
 # @the-devoyage/graphql-users
 
-A ready to spin up users microservice with prebuilt features for user authentication and user data storage. This can be used out of the box with some simple configurations applied, or as a starting point for a users microservice of your own.
+The Devoyage's GraphQL Users Service is a ready to production micro-service for Federated GraphQL APIs. Adding this service to your API instantly adds User profiles and Memberships to your application.
 
 ## Features
 
-### User
+### User Data
 
-Add users to your api with this users microservice. This service is a secondary authentication service as each user is scoped to an account -- meaning each account can have multiple users.
+Create, read, update, and delete data that is pertinent to your users such as names, addresses, phones, and more. This API allows you to store data that is associated with each user.
 
-```graphql
-type User {
-  _id: ObjectID!
-  first_name: String
-  last_name: String
-  phone: String
-  address: Address
-  email: String!
-  password: String
-  created_by: User
-  stripe_customer_id: String
-  stripe_connected_account_id: String
-  image: Media
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  account: Account!
-  role: Int!
-}
+```ts
+export type User = {
+  __typename?: "User";
+  _id: Scalars["ObjectID"];
+  about?: Maybe<Scalars["String"]>;
+  address?: Maybe<Address>;
+  createdAt: Scalars["DateTime"];
+  created_by?: Maybe<User>;
+  email: Scalars["String"];
+  first_name?: Maybe<Scalars["String"]>;
+  image?: Maybe<Media>;
+  last_name?: Maybe<Scalars["String"]>;
+  memberships: Array<Membership>;
+  phone?: Maybe<Scalars["String"]>;
+  updatedAt: Scalars["DateTime"];
+};
 ```
 
-### Built In Resolvers
+### Memberships
 
-- Get Users - Returns a paginated and filterable list of users. Filter by any property that a user has.
+The users service extends an Accounts Service (not included) that handles authentication allowing each user to belong to one or more accounts. To become part of an account, users must accept an invite. Roles are also scoped by account - allowing a user to carry unique roles within multiple accounts.
 
-- User Login - Allows an authenticated account to select and authenticate a user. Password optional.
+## Tech
 
-- Update User - Update user properties. Users can only update their own User data. Admin may update all users.
+- Node
+- Apollo Federation
+- GraphQL
+- JWT Authentication
+- Docker
 
-- Create User - Add user to the currently authenticated account. Admin may add users to any account.
-
-- Delete User - Allows users to delete their own user data. Admin may delete any user.
-
-- Get Me - Allows an authenticated user to request their own user data.
-
-### Security
-
-**Running The Server**
-
-You should never expose the service directly to the public. Instead it should sit behind a gateway, which handles authorization parsing.
-
-**Passwords in the Database**
-
-Passwords are hashed and salted before being saved to a mongo database. Provide the mongo URI in the Environment Variables to connect the database.
-
-## Usage
-
-### Access Required Repositories
-
-First, be sure you have been granted instant access as a collaborator to the `@the-devoyage/graphql-users` repository by purchasing access at our [BaseTools Checkout](https://basetools.io/checkout/dQe81uv0) page. This will give you access to clone this repo.
+## Getting Started
 
 ### Install Dependencies
 
-1. Once you have access to the required repos above, be sure to login to the Github registry with NPM.
+1. Login to the Github registry with NPM.
 
 ```
 npm login --registry=https://npm.pkg.github.com
@@ -72,19 +54,7 @@ npm login --registry=https://npm.pkg.github.com
 npm install
 ```
 
-If you are using docker to build and run this server, you will need to pass the github token along to the build process.
-
-Assign an environment variable to the Github Token locally:
-
-```bash
-export GITHUB_TOKEN=mytoken
-```
-
-For docker, you can run:
-
-```bash
-docker build -t --build-arg GTIHUB_TOKEN=${GITHUB_TOKEN} .
-```
+If you are using docker to build and run this server, you will need to pass a github token along to the build process as a build arg.
 
 ### Configure Environment Variables
 
@@ -104,13 +74,15 @@ In Production:
 npm start
 ```
 
-## Querying the Server
+### Querying the Server
 
-The server should sit behind a federated gateway. Query the gateway to query the server. Use the Apollo Sandbox for generated documentation on available resolvers and queries.
+The server should sit behind a federated gateway. Query the gateway to query the server. Use the Apollo Sandbox generated documentation to view available queries and mutations.
+
+The gateway should send context to this service with the following required headers.
 
 **Required Headers**
 
-All routes within this service require a `context` header to be passed with the request. The `context` header should be stringified JSON of the type Context. Be sure to include the `auth` property.
+All requests which enter this service require a `context` header. The `context` header should be stringified JSON of the type Context, shown below. Use the gateway to parse the authentication, then pass the auth context to this service.
 
 ```ts
 interface Context extends Record<string, any> {
@@ -127,10 +99,121 @@ interface Context extends Record<string, any> {
 }
 ```
 
-## Recommended Services
+### Extended Properties/Required Services
 
-- `@the-devoyage/graphql-gateway` - An apollo gateway server with pre-configured features such as user authorization, file routing/file upload routing, and supergraph configuration. This repo is compatible with this service and can act as the gateway for this service. [Purchase Access](https://basetools.io/checkout/XGUVNNGr)
+The users service extends federated entities from external services. The following federated services and properties are required in order to run this service.
 
-- `@the-devoyage/graphql-accounts` - An accounts service that handles account creation, authentication, and verification. It is compatible with this service out and can handle supplying the requirements for the `account` property of the user above. [Purchase Access](https://basetools.io/checkout/v0cv56df)
+Account
 
-- `@the-devoyage/graphql-media` - A file upload and file server that can be used to store the "image" attribute of a user, above. This repo provides a ready to go version fully compatible with this service. [Purchase Access](https://basetools.io/checkout/mwsLnkUZ)
+- \_id
+- email
+
+Media
+
+- \_id
+
+## Usage
+
+Once you have everything setup, you can start using the `graphql-users` API.
+
+### Initial Login
+
+Use the extended property `loginUser` on the `Account` entity within the API. A JWT token is returned.
+
+- User is automatically created at initial login.
+- Membership to account is automatically created.
+- JWT is issued using the package, `the-devoyage/micro-auth-helpers`.
+
+```graphql
+mutation Login($loginInput: LoginInput!) {
+  login(loginInput: $loginInput) {
+    account {
+      loginUser {
+        token
+      }
+    }
+  }
+}
+```
+
+### CRUD User
+
+The following resolvers can be used to create, read, update, and delete users.
+
+- me - Fetches the currently logged in user.
+- getUsers - Find, filter, and paginate users.
+- createUser - Anyone can create a new user.
+- deleteUser - Users may delete their own user.
+- updateUser - User may update their own details.
+
+### Memberships
+
+Users may manage multiple accounts within the API. Each account that the user may access shows up in the memberships property of user document.
+
+**Invite Users to Your Account, or Remove Users From Your Account**
+
+Invite users by using the `updateUser` mutation. Include the memberships variable with a status of `PENDING` to invite the user to join your account.
+
+You may always set the status to `REVOKED` to remove a user from your account.
+
+Include a role, to limit the user's capability within an account.
+
+```json
+{
+  "updateUserInput": {
+    "user": {
+      "email": {
+        "filterBy": "MATCH",
+        "string": "nickmclean@thedevoyage.com"
+      }
+    },
+    "memberships": {
+      "account": "my_account_id",
+      "role": 100,
+      "status": "PENDING" // "REVOKED"
+    }
+  }
+}
+```
+
+**_Hint_**: If the user that you are inviting does not exist within the database, simply use the `createUser` mutation resolver to create a user first. The newly created user can register an account with the same email to manage your account.
+
+**Accept Invite From Other User**
+
+You may switch the status of any of your memberships to `ACTIVE` or `INACTIVE`, as long as the membership does not have the status of `REVOKED`.
+
+```json
+{
+  "updateUserInput": {
+    "user": {
+      "_id": {
+        "filterBy": "OBJECTID",
+        "string": "my_unique_object_id"
+      }
+    },
+    "memberships": {
+      "account": "my_account_id",
+      "status": "ACTIVE" // "INACTIVE"
+    }
+  }
+}
+```
+
+**Switch Membership**
+
+Send a mutation with the following variables to the `switchUserMembership` resolver to change account access. Users must be logged in to their own membership before switching memberships.
+
+```json
+{
+  "switchUserMembershipInput": {
+    "membership_id": "6259e0696f90352f2f3b9070",
+    "user_id": "6259dfa06f90352f2f3b9060"
+  }
+}
+```
+
+A response with a new JWT will be sent back, granting access to the account as the user.
+
+## Contribute
+
+GraphQL Users is an open source project and welcomes PR and Issue reports. Feel free to send me feature requests, bug reports, or friendly hellos! Thanks for your help!

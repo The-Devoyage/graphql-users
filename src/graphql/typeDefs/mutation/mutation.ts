@@ -7,21 +7,35 @@ export const Mutation = gql`
     last_name: String
     phone: String
     image: ID
-    account: ID
-    role: Int
     about: String
   }
 
   input UpdateUserInput {
-    email: String
-    phone: String
+    user: GetUsersInput!
     last_name: String
     first_name: String
-    _id: ObjectID!
+    email: String
+    phone: String
     address: AddressInput
     image: ObjectID
+    about: String
+    memberships: MembershipInput
+  }
+
+  input MembershipInput {
     role: Int
-    account: ObjectID
+    account: ObjectID!
+    status: MembershipStatusEnum
+    local: LocalMembershipInput
+    default: Boolean
+  }
+
+  input LocalMembershipInput {
+    first_name: String
+    last_name: String
+    phone: String
+    address: AddressInput
+    image: ObjectID
     about: String
   }
 
@@ -37,14 +51,8 @@ export const Mutation = gql`
     _id: ObjectID!
   }
 
-  input LoginUserCredentialsInput {
-    email: String!
-    password: String!
-  }
-
-  input LoginUserInput {
-    _id: ObjectID!
-    credentials: LoginUserCredentialsInput
+  input SwitchUserMembershipInput {
+    membership_id: ObjectID!
   }
 
   type LoginUserResponse {
@@ -53,7 +61,9 @@ export const Mutation = gql`
   }
 
   extend type Mutation {
-    loginUser(loginUserInput: LoginUserInput!): LoginUserResponse!
+    switchUserMembership(
+      switchUserMembershipInput: SwitchUserMembershipInput!
+    ): LoginUserResponse!
     updateUser(updateUserInput: UpdateUserInput!): User!
     createUser(createUserInput: CreateUserInput!): User!
     deleteUser(deleteUserInput: DeleteUserInput!): User!

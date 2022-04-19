@@ -1,37 +1,111 @@
 import { GenerateMongo } from "@the-devoyage/mongo-filter-generator";
 import { User } from "@src/models";
-import bcrypt from "bcryptjs";
-import { AccountResolvers, User as IUser } from "types/generated";
+import {
+  AccountResolvers,
+  UpdateUserInput,
+  User as IUser,
+} from "types/generated";
 import { Helpers } from "@the-devoyage/micro-auth-helpers";
+import { updateMembership } from "../mutation/update-membership";
 
 export const Account: AccountResolvers = {
-  loginUser: async (account, args) => {
-    if (!args.loginUserInput) {
-      return null;
-    }
+  loginUser: async (account) => {
     try {
-      const user = await User.findOne<IUser>({
-        _id: args.loginUserInput?._id,
+      const { filter } = GenerateMongo<IUser>({
+        fieldFilters: {},
+        fieldRules: [
+          {
+            action: "OVERRIDE",
+            location: "email",
+            fieldFilter: {
+              string: account.email,
+              filterBy: "MATCH",
+              operator: "OR",
+              groups: ["loginUser.and"],
+            },
+          },
+          {
+            action: "OVERRIDE",
+            location: "memberships.default",
+            fieldFilter: {
+              bool: true,
+              groups: ["loginUser.and"],
+              filterBy: "EQ",
+              operator: "OR",
+            },
+          },
+          {
+            action: "OVERRIDE",
+            location: "memberships.account",
+            fieldFilter: {
+              string: account._id,
+              groups: ["loginUser.and"],
+              filterBy: "OBJECTID",
+              operator: "OR",
+            },
+          },
+        ],
       });
+
+      let user = await User.findOne<IUser>(filter);
+
+      if (!user) {
+        const newUser = new User({ email: account.email });
+        await newUser.save();
+        user = await User.findOne<IUser>({
+          email: account.email,
+        });
+
+        if (!user) {
+          throw new Error("Something went wrong when logging user in.");
+        }
+      }
+
+      let membership = user?.memberships.find(
+        (m) => m.account._id.toString() === account?._id.toString()
+      );
+
+      if (!membership) {
+        user = await updateMembership(
+          {
+            user: {
+              _id: [
+                {
+                  filterBy: "OBJECTID",
+                  string: user._id,
+                },
+              ],
+            },
+            memberships: {
+              role: 10,
+              account: account._id,
+              status: "ACTIVE",
+              default: true,
+            },
+          } as UpdateUserInput,
+          {
+            auth: {
+              isAuth: true,
+              payload: {
+                account: { _id: account._id, email: account.email },
+                user: { _id: user._id, role: 100, email: user.email },
+              },
+            },
+          }
+        );
+        membership = user?.memberships.find(
+          (m) => m.account._id.toString() === account?._id.toString()
+        );
+
+        if (!membership) {
+          throw new Error(
+            "Failed to create new membership when loggin user in."
+          );
+        }
+      }
 
       if (!user) {
         throw new Error("Something went wrong when logging user in.");
-      }
-
-      if (user.account.toString() !== account._id.toString()) {
-        return null;
-      }
-
-      if (user?.password) {
-        if (args.loginUserInput?.credentials) {
-          const authenticated = await bcrypt.compare(
-            args.loginUserInput?.credentials?.password,
-            user.password
-          );
-          if (!authenticated) {
-            throw new Error("Something went wrong when logging user in.");
-          }
-        }
       }
 
       if (process.env.JWT_ENCRYPTION_KEY) {
@@ -41,7 +115,7 @@ export const Account: AccountResolvers = {
               _id: account._id,
               email: account.email,
             },
-            user: { _id: user._id, role: user.role, email: user.email },
+            user: { _id: user._id, role: membership.role, email: user.email },
           },
           secretOrPublicKey: process.env.JWT_ENCRYPTION_KEY,
           options: { expiresIn: "10h" },
@@ -75,13 +149,24 @@ export const Account: AccountResolvers = {
         },
         fieldRules: [
           {
-            location: "account",
+            location: "memberships.account",
             fieldFilter: {
               string: account._id,
               filterBy: "OBJECTID",
-              operator: "AND",
+              operator: "OR",
+              groups: ["account_users.and"],
             },
-            action: "OVERRIDE"
+            action: "OVERRIDE",
+          },
+          {
+            location: "email",
+            fieldFilter: {
+              string: account.email,
+              filterBy: "MATCH",
+              operator: "OR",
+              groups: ["account_users.and"],
+            },
+            action: "INITIAL",
           },
         ],
       });

@@ -5,15 +5,23 @@ export const Query = gql`
     created_by: [StringFieldFilter]
     email: [StringFieldFilter]
     _id: [StringFieldFilter]
-    account: [StringArrayFieldFilter]
     first_name: [StringFieldFilter]
     last_name: [StringFieldFilter]
     phone: [StringFieldFilter]
     config: FilterConfig
     image: [StringFieldFilter]
-    role: [IntFieldFilter]
     createdAt: [DateFieldFilter]
     updatedAt: [DateFieldFilter]
+    memberships: [GetUserByMembershipInput]
+  }
+
+  input GetUserByMembershipInput {
+    status: StringFieldFilter
+    _id: StringFieldFilter
+    createdAt: DateFieldFilter
+    updatedAt: DateFieldFilter
+    role: [IntFieldFilter]
+    account: StringFieldFilter
   }
 
   type GetUsersResponse {
