@@ -15,6 +15,7 @@ const MembershipSchema = new Schema(
     created_by: {
       type: Schema.Types.ObjectId,
       required: true,
+      ref: "User",
     },
     account: {
       type: Schema.Types.ObjectId,
@@ -85,6 +86,7 @@ const UserSchema = new Schema<User, FindAndPaginateModel>(
     created_by: {
       type: Schema.Types.ObjectId,
       required: false,
+      ref: "User",
     },
     image: {
       type: Schema.Types.ObjectId,

@@ -1,13 +1,10 @@
 import { gql } from "apollo-server-express";
 
 export const Mutation = gql`
-  input CreateUserInput {
+  input InviteUserInput {
     email: String!
-    first_name: String
-    last_name: String
-    phone: String
-    image: ID
-    about: String
+    role: Int
+    local: LocalMembershipInput
   }
 
   input UpdateUserInput {
@@ -55,17 +52,23 @@ export const Mutation = gql`
     membership_id: ObjectID!
   }
 
+  input LoginUserInput {
+    email: String!
+    account_id: ObjectID!
+  }
+
   type LoginUserResponse {
     user: User!
     token: String!
   }
 
   extend type Mutation {
+    loginUser(loginUserInput: LoginUserInput!): LoginUserResponse!
     switchUserMembership(
       switchUserMembershipInput: SwitchUserMembershipInput!
     ): LoginUserResponse!
     updateUser(updateUserInput: UpdateUserInput!): User!
-    createUser(createUserInput: CreateUserInput!): User!
+    inviteUser(inviteUserInput: InviteUserInput!): User!
     deleteUser(deleteUserInput: DeleteUserInput!): User!
   }
 `;

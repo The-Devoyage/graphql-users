@@ -7,12 +7,18 @@ export const Query: QueryResolvers = {
   me: async (_parent, _args, context) => {
     try {
       Helpers.Resolver.CheckAuth({ context, requireUser: true });
+
       const me = await User.findOne<IUser>({
         _id: context.auth.payload.user?._id,
       }).select("-password");
+
       if (!me) {
         throw new Error("User can not be found.");
       }
+
+      await User.populate(me, { path: "created_by" });
+      await User.populate(me, { path: "memberships.created_by" });
+
       return me;
     } catch (error) {
       console.log(error);

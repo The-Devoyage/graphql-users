@@ -6,10 +6,12 @@
     "strict": true,
     "baseUrl": ".",
     "esModuleInterop": true,
-    "skipLibCheck": true ,
+    "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "paths": {
-      "@src/*": ["src/*"]
+      "@src/*": [
+        "src/*"
+      ]
     }
   },
   "include": [
@@ -17,5 +19,7 @@
     "types/generated/index.d.ts",
     "src"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }

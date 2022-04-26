@@ -16,7 +16,7 @@ export const Query = gql`
   }
 
   input GetUserByMembershipInput {
-    status: StringFieldFilter
+    status: [StringFieldFilter]
     _id: StringFieldFilter
     createdAt: DateFieldFilter
     updatedAt: DateFieldFilter

@@ -4,7 +4,6 @@ export const Account = gql`
   extend type Account @key(fields: "_id") {
     _id: ObjectID! @external
     email: String! @external
-    loginUser: LoginUserResponse @requires(fields: "_id email")
     users(getUsersInput: GetUsersInput!): GetUsersResponse!
       @requires(fields: "_id email")
   }

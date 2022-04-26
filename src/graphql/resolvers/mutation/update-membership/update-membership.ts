@@ -174,6 +174,10 @@ export const updateMembership = async (
           new: true,
         }
       );
+
+      await User.populate(updated, { path: "created_by" });
+      await User.populate(updated, { path: "memberships.created_by" });
+
       return updated;
     } else {
       const updated = await User.findOneAndUpdate<IUser>(
@@ -188,6 +192,7 @@ export const updateMembership = async (
               status: updateUserInput.memberships.status,
               local: updateUserInput.memberships.local,
               default: updateUserInput.memberships.default,
+              created_by: context.auth.payload.user?._id,
             },
           },
         },
@@ -195,6 +200,9 @@ export const updateMembership = async (
           new: true,
         }
       );
+      await User.populate(updated, { path: "created_by" });
+      await User.populate(updated, { path: "memberships.created_by" });
+
       return updated;
     }
   }

@@ -22,7 +22,6 @@ export type Account = {
   __typename?: 'Account';
   _id: Scalars['ObjectID'];
   email: Scalars['String'];
-  loginUser?: Maybe<LoginUserResponse>;
   users: GetUsersResponse;
 };
 
@@ -67,15 +66,6 @@ export enum BooleanFilterByEnum {
   Ne = 'NE'
 }
 
-export type CreateUserInput = {
-  about?: InputMaybe<Scalars['String']>;
-  email: Scalars['String'];
-  first_name?: InputMaybe<Scalars['String']>;
-  image?: InputMaybe<Scalars['ID']>;
-  last_name?: InputMaybe<Scalars['String']>;
-  phone?: InputMaybe<Scalars['String']>;
-};
-
 /** Filter for documents which have a property that is a Date. */
 export type DateFieldFilter = {
   date: Scalars['DateTime'];
@@ -107,7 +97,7 @@ export type GetUserByMembershipInput = {
   account?: InputMaybe<StringFieldFilter>;
   createdAt?: InputMaybe<DateFieldFilter>;
   role?: InputMaybe<Array<InputMaybe<IntFieldFilter>>>;
-  status?: InputMaybe<StringFieldFilter>;
+  status?: InputMaybe<Array<InputMaybe<StringFieldFilter>>>;
   updatedAt?: InputMaybe<DateFieldFilter>;
 };
 
@@ -148,6 +138,12 @@ export enum IntFilterByEnum {
   Ne = 'NE'
 }
 
+export type InviteUserInput = {
+  email: Scalars['String'];
+  local?: InputMaybe<LocalMembershipInput>;
+  role?: InputMaybe<Scalars['Int']>;
+};
+
 export type LocalMembershipInput = {
   about?: InputMaybe<Scalars['String']>;
   address?: InputMaybe<AddressInput>;
@@ -165,6 +161,11 @@ export type LocalUserDetails = {
   image?: Maybe<Media>;
   last_name?: Maybe<Scalars['String']>;
   phone?: Maybe<Scalars['String']>;
+};
+
+export type LoginUserInput = {
+  account_id: Scalars['ObjectID'];
+  email: Scalars['String'];
 };
 
 export type LoginUserResponse = {
@@ -208,20 +209,26 @@ export enum MembershipStatusEnum {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  createUser: User;
   deleteUser: User;
+  inviteUser: User;
+  loginUser: LoginUserResponse;
   switchUserMembership: LoginUserResponse;
   updateUser: User;
 };
 
 
-export type MutationCreateUserArgs = {
-  createUserInput: CreateUserInput;
+export type MutationDeleteUserArgs = {
+  deleteUserInput: DeleteUserInput;
 };
 
 
-export type MutationDeleteUserArgs = {
-  deleteUserInput: DeleteUserInput;
+export type MutationInviteUserArgs = {
+  inviteUserInput: InviteUserInput;
+};
+
+
+export type MutationLoginUserArgs = {
+  loginUserInput: LoginUserInput;
 };
 
 
@@ -396,7 +403,6 @@ export type ResolversTypes = ResolversObject<{
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   BooleanFieldFilter: BooleanFieldFilter;
   BooleanFilterByEnum: BooleanFilterByEnum;
-  CreateUserInput: CreateUserInput;
   DateFieldFilter: DateFieldFilter;
   DateFilterByEnum: DateFilterByEnum;
   DateTime: ResolverTypeWrapper<Scalars['DateTime']>;
@@ -405,12 +411,13 @@ export type ResolversTypes = ResolversObject<{
   GetUserByMembershipInput: GetUserByMembershipInput;
   GetUsersInput: GetUsersInput;
   GetUsersResponse: ResolverTypeWrapper<GetUsersResponse>;
-  ID: ResolverTypeWrapper<Scalars['ID']>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   IntFieldFilter: IntFieldFilter;
   IntFilterByEnum: IntFilterByEnum;
+  InviteUserInput: InviteUserInput;
   LocalMembershipInput: LocalMembershipInput;
   LocalUserDetails: ResolverTypeWrapper<LocalUserDetails>;
+  LoginUserInput: LoginUserInput;
   LoginUserResponse: ResolverTypeWrapper<LoginUserResponse>;
   Media: ResolverTypeWrapper<Media>;
   Membership: ResolverTypeWrapper<Membership>;
@@ -441,7 +448,6 @@ export type ResolversParentTypes = ResolversObject<{
   AddressInput: AddressInput;
   Boolean: Scalars['Boolean'];
   BooleanFieldFilter: BooleanFieldFilter;
-  CreateUserInput: CreateUserInput;
   DateFieldFilter: DateFieldFilter;
   DateTime: Scalars['DateTime'];
   DeleteUserInput: DeleteUserInput;
@@ -449,11 +455,12 @@ export type ResolversParentTypes = ResolversObject<{
   GetUserByMembershipInput: GetUserByMembershipInput;
   GetUsersInput: GetUsersInput;
   GetUsersResponse: GetUsersResponse;
-  ID: Scalars['ID'];
   Int: Scalars['Int'];
   IntFieldFilter: IntFieldFilter;
+  InviteUserInput: InviteUserInput;
   LocalMembershipInput: LocalMembershipInput;
   LocalUserDetails: LocalUserDetails;
+  LoginUserInput: LoginUserInput;
   LoginUserResponse: LoginUserResponse;
   Media: Media;
   Membership: Membership;
@@ -481,7 +488,6 @@ export type ExtendsDirectiveResolver<Result, Parent, ContextType = Context, Args
 export type AccountResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Account'] = ResolversParentTypes['Account']> = ResolversObject<{
   _id?: Resolver<ResolversTypes['ObjectID'], ParentType, ContextType>;
   email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  loginUser?: Resolver<Maybe<ResolversTypes['LoginUserResponse']>, ParentType, ContextType>;
   users?: Resolver<ResolversTypes['GetUsersResponse'], ParentType, ContextType, RequireFields<AccountUsersArgs, 'getUsersInput'>>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -540,8 +546,9 @@ export type MembershipResolvers<ContextType = Context, ParentType extends Resolv
 }>;
 
 export type MutationResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
-  createUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationCreateUserArgs, 'createUserInput'>>;
   deleteUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationDeleteUserArgs, 'deleteUserInput'>>;
+  inviteUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationInviteUserArgs, 'inviteUserInput'>>;
+  loginUser?: Resolver<ResolversTypes['LoginUserResponse'], ParentType, ContextType, RequireFields<MutationLoginUserArgs, 'loginUserInput'>>;
   switchUserMembership?: Resolver<ResolversTypes['LoginUserResponse'], ParentType, ContextType, RequireFields<MutationSwitchUserMembershipArgs, 'switchUserMembershipInput'>>;
   updateUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationUpdateUserArgs, 'updateUserInput'>>;
 }>;

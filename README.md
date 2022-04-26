@@ -1,10 +1,10 @@
 # @the-devoyage/graphql-users
 
-The Devoyage's GraphQL Users Service is a ready to production micro-service for Federated GraphQL APIs. Adding this service to your API instantly adds User profiles and Memberships to your application.
+The Devoyage's `graphql-users` repository is a production ready "Users and Memberships" Micro Service used to start or extend any API. Enable features like User Management, User Details, Account Memberships, and Roles simply by spinning up this service with an API. (Or use it as a starter for your next Users and Memberships API).
 
 ## Features
 
-### User Data
+### Save User Details
 
 Create, read, update, and delete data that is pertinent to your users such as names, addresses, phones, and more. This API allows you to store data that is associated with each user.
 
@@ -26,9 +26,20 @@ export type User = {
 };
 ```
 
+### User Management
+
+The following resolvers can be used to create, read, update, and delete users.
+
+- me - Fetches the currently logged in user
+- getUsers - Find, filter, and paginate all users
+- inviteUser - Anyone can invite a new user to your platform
+- deleteUser - Users may delete their own user
+- updateUser - Users and Membership Owners may update User Details
+- loginUser - Use your existing authentication system to create and authenticate a user
+
 ### Memberships
 
-The users service extends an Accounts Service (not included) that handles authentication allowing each user to belong to one or more accounts. To become part of an account, users must accept an invite. Roles are also scoped by account - allowing a user to carry unique roles within multiple accounts.
+Memberships allow users to share assets within your API. The required login parameter, `account_id`, is used to scope users to accounts. Long story short, from here users can share access to each others account after accepting/managing invitations. More on how this works below!
 
 ## Tech
 
@@ -82,7 +93,7 @@ The gateway should send context to this service with the following required head
 
 **Required Headers**
 
-All requests which enter this service require a `context` header. The `context` header should be stringified JSON of the type Context, shown below. Use the gateway to parse the authentication, then pass the auth context to this service.
+All requests which enter this service require a `context` header as shown below.
 
 ```ts
 interface Context extends Record<string, any> {
@@ -116,37 +127,34 @@ Media
 
 Once you have everything setup, you can start using the `graphql-users` API.
 
-### Initial Login
+### 1. Initial Login
 
-Use the extended property `loginUser` on the `Account` entity within the API. A JWT token is returned.
+Use the resolver, `loginUser`, to login a known or unknown user.
 
 - User is automatically created at initial login.
 - Membership to account is automatically created.
 - JWT is issued using the package, `the-devoyage/micro-auth-helpers`.
 
 ```graphql
-mutation Login($loginInput: LoginInput!) {
-  login(loginInput: $loginInput) {
-    account {
-      loginUser {
-        token
-      }
+mutation LoginUser($loginUserInput: LoginUserInput!) {
+  loginUser(loginUserInput: $loginUserInput) {
+    token
+    user {
+      _id
     }
   }
 }
 ```
 
-### CRUD User
+### 2. Get Users
 
-The following resolvers can be used to create, read, update, and delete users.
+Find filter and paginate users based on any property that a user type contains.
 
-- me - Fetches the currently logged in user.
-- getUsers - Find, filter, and paginate users.
-- createUser - Anyone can create a new user.
-- deleteUser - Users may delete their own user.
-- updateUser - User may update their own details.
+### 3. Get Me
 
-### Memberships
+Use the `me` resolver to fetch user information associated with the logged in user (Refer to Required Headers to determine Logged In User).
+
+### 4. Memberships
 
 Users may manage multiple accounts within the API. Each account that the user may access shows up in the memberships property of user document.
 
@@ -176,7 +184,7 @@ Include a role, to limit the user's capability within an account.
 }
 ```
 
-**_Hint_**: If the user that you are inviting does not exist within the database, simply use the `createUser` mutation resolver to create a user first. The newly created user can register an account with the same email to manage your account.
+**_tip_**: If the user that you are inviting does not exist within the database, simply use the `inviteUser` mutation resolver to automatically create and invite a user.
 
 **Accept Invite From Other User**
 
@@ -206,14 +214,9 @@ Send a mutation with the following variables to the `switchUserMembership` resol
 ```json
 {
   "switchUserMembershipInput": {
-    "membership_id": "6259e0696f90352f2f3b9070",
-    "user_id": "6259dfa06f90352f2f3b9060"
+    "membership_id": "6259e0696f90352f2f3b9070"
   }
 }
 ```
 
 A response with a new JWT will be sent back, granting access to the account as the user.
-
-## Contribute
-
-GraphQL Users is an open source project and welcomes PR and Issue reports. Feel free to send me feature requests, bug reports, or friendly hellos! Thanks for your help!
