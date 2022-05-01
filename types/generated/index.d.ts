@@ -163,11 +163,6 @@ export type LocalUserDetails = {
   phone?: Maybe<Scalars['String']>;
 };
 
-export type LoginUserInput = {
-  account_id: Scalars['ObjectID'];
-  email: Scalars['String'];
-};
-
 export type LoginUserResponse = {
   __typename?: 'LoginUserResponse';
   token: Scalars['String'];
@@ -224,11 +219,6 @@ export type MutationDeleteUserArgs = {
 
 export type MutationInviteUserArgs = {
   inviteUserInput: InviteUserInput;
-};
-
-
-export type MutationLoginUserArgs = {
-  loginUserInput: LoginUserInput;
 };
 
 
@@ -417,7 +407,6 @@ export type ResolversTypes = ResolversObject<{
   InviteUserInput: InviteUserInput;
   LocalMembershipInput: LocalMembershipInput;
   LocalUserDetails: ResolverTypeWrapper<LocalUserDetails>;
-  LoginUserInput: LoginUserInput;
   LoginUserResponse: ResolverTypeWrapper<LoginUserResponse>;
   Media: ResolverTypeWrapper<Media>;
   Membership: ResolverTypeWrapper<Membership>;
@@ -460,7 +449,6 @@ export type ResolversParentTypes = ResolversObject<{
   InviteUserInput: InviteUserInput;
   LocalMembershipInput: LocalMembershipInput;
   LocalUserDetails: LocalUserDetails;
-  LoginUserInput: LoginUserInput;
   LoginUserResponse: LoginUserResponse;
   Media: Media;
   Membership: Membership;
@@ -548,7 +536,7 @@ export type MembershipResolvers<ContextType = Context, ParentType extends Resolv
 export type MutationResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   deleteUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationDeleteUserArgs, 'deleteUserInput'>>;
   inviteUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationInviteUserArgs, 'inviteUserInput'>>;
-  loginUser?: Resolver<ResolversTypes['LoginUserResponse'], ParentType, ContextType, RequireFields<MutationLoginUserArgs, 'loginUserInput'>>;
+  loginUser?: Resolver<ResolversTypes['LoginUserResponse'], ParentType, ContextType>;
   switchUserMembership?: Resolver<ResolversTypes['LoginUserResponse'], ParentType, ContextType, RequireFields<MutationSwitchUserMembershipArgs, 'switchUserMembershipInput'>>;
   updateUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationUpdateUserArgs, 'updateUserInput'>>;
 }>;

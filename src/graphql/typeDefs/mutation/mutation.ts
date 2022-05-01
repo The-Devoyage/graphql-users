@@ -52,18 +52,13 @@ export const Mutation = gql`
     membership_id: ObjectID!
   }
 
-  input LoginUserInput {
-    email: String!
-    account_id: ObjectID!
-  }
-
   type LoginUserResponse {
     user: User!
     token: String!
   }
 
   extend type Mutation {
-    loginUser(loginUserInput: LoginUserInput!): LoginUserResponse!
+    loginUser: LoginUserResponse!
     switchUserMembership(
       switchUserMembershipInput: SwitchUserMembershipInput!
     ): LoginUserResponse!
