@@ -2,6 +2,10 @@
 
 The Devoyage's `graphql-users` repository is a production ready "Users and Memberships" Micro Service used to start or extend any API. Enable features like User Management, User Details, Account Memberships, and Roles simply by spinning up this service with an API. (Or use it as a starter for your next Users and Memberships API).
 
+## License
+
+This repository provides a GPL License by default. If you want to use this product in a private commericial setting, you may purchase the MIT Licensed Version [Here!](https://thedevoyage.gumroad.com/l/graphql-users)
+
 ## Features
 
 ### Save User Details
