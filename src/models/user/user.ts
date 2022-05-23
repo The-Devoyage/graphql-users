@@ -80,7 +80,7 @@ const UserSchema = new Schema<User, FindAndPaginateModel>(
     },
     email: {
       type: String,
-      required: false,
+      required: true,
       unique: true,
     },
     created_by: {

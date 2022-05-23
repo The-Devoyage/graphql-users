@@ -8,9 +8,9 @@ export const User = gql`
     created_by: User
     first_name: String
     last_name: String
-    phone: String
+    phone: PhoneNumber
     address: Address
-    email: String!
+    email: EmailAddress!
     image: Media
     memberships: [Membership!]!
     about: String
@@ -19,7 +19,7 @@ export const User = gql`
   type LocalUserDetails {
     first_name: String
     last_name: String
-    phone: String
+    phone: PhoneNumber
     address: Address
     image: Media
     about: String
@@ -49,6 +49,7 @@ export const User = gql`
     lineTwo: String
     city: String!
     state: String!
-    zip: String!
+    zip: PostalCode!
+    country: CountryCode!
   }
 `;
