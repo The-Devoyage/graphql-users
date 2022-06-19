@@ -45,11 +45,12 @@ export const User = gql`
   }
 
   type Address {
-    lineOne: String!
+    lineOne: String
     lineTwo: String
-    city: String!
-    state: String!
-    zip: PostalCode!
-    country: CountryCode!
+    city: String
+    state: String
+    zip: PostalCode
+    country: CountryCode
+    _id: ObjectID
   }
 `;

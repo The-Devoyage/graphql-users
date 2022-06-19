@@ -4,7 +4,6 @@ import {
   MembershipStatusEnum,
   MutationResolvers,
   StringFilterByEnum,
-  UpdateUserInput,
   User as IUser,
 } from "types/generated";
 import { Helpers } from "@the-devoyage/micro-auth-helpers";
@@ -20,8 +19,15 @@ export const Mutation: MutationResolvers = {
         roleLimit: 1,
       });
 
-      const { email, about, image, phone, address, last_name, first_name } =
-        args.createUserInput.payload;
+      const {
+        email,
+        about,
+        image,
+        phone,
+        address,
+        last_name,
+        first_name,
+      } = args.createUserInput.payload;
 
       const newUser = new User({
         email,
@@ -52,25 +58,23 @@ export const Mutation: MutationResolvers = {
         const userWithMembership = await updateMembership(
           {
             query: {
-              user: {
-                _id: [
-                  {
-                    filterBy: "OBJECTID",
-                    string: user._id,
-                  },
-                ],
-              },
+              _id: [
+                {
+                  filterBy: "OBJECTID" as StringFilterByEnum,
+                  string: user._id,
+                },
+              ],
             },
             payload: {
               memberships: {
                 role: role ?? 100,
                 account,
-                status: status ?? "PENDING",
+                status: status ?? ("PENDING" as MembershipStatusEnum),
                 local,
                 default: isAccountOwner,
               },
             },
-          } as UpdateUserInput,
+          },
           context
         );
 
@@ -152,24 +156,22 @@ export const Mutation: MutationResolvers = {
         user = await updateMembership(
           {
             query: {
-              user: {
-                _id: [
-                  {
-                    filterBy: "OBJECTID",
-                    string: user._id,
-                  },
-                ],
-              },
+              _id: [
+                {
+                  filterBy: "OBJECTID" as StringFilterByEnum,
+                  string: user._id,
+                },
+              ],
             },
             payload: {
               memberships: {
                 role: 10,
                 account: account._id,
-                status: "ACTIVE",
+                status: "ACTIVE" as MembershipStatusEnum,
                 default: true,
               },
             },
-          } as UpdateUserInput,
+          },
           {
             auth: {
               isAuth: true,
@@ -308,8 +310,15 @@ export const Mutation: MutationResolvers = {
       if (!user) {
         const created_by = context.auth.payload?.user?._id;
 
-        const { first_name, last_name, phone, email, address, image, about } =
-          args.inviteUserInput.payload;
+        const {
+          first_name,
+          last_name,
+          phone,
+          email,
+          address,
+          image,
+          about,
+        } = args.inviteUserInput.payload;
 
         const newUser = new User({
           email,
@@ -350,19 +359,17 @@ export const Mutation: MutationResolvers = {
       user = await updateMembership(
         {
           query: {
-            user: {
-              _id: [
-                {
-                  string: user._id.toString(),
-                  filterBy: "OBJECTID" as StringFilterByEnum,
-                },
-              ],
-            },
+            _id: [
+              {
+                string: user._id.toString(),
+                filterBy: "OBJECTID" as StringFilterByEnum,
+              },
+            ],
           },
           payload: {
             memberships: {
               role: role ?? 100,
-              account: account ?? context.auth.payload.account?._id,
+              account: account ?? context.auth.payload.account?._id!,
               status: status ?? ("PENDING" as MembershipStatusEnum),
               local: {
                 about: local?.about,
@@ -374,7 +381,7 @@ export const Mutation: MutationResolvers = {
               },
             },
           },
-        } as UpdateUserInput,
+        },
         context
       );
 

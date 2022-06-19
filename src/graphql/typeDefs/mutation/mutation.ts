@@ -44,12 +44,12 @@ export const Mutation = gql`
   }
 
   input AddressInput {
-    lineOne: String!
+    lineOne: String
     lineTwo: String
-    city: String!
-    state: String!
-    zip: PostalCode!
-    country: CountryCode!
+    city: String
+    state: String
+    zip: PostalCode
+    country: CountryCode
   }
 
   input DeleteUsersInput {

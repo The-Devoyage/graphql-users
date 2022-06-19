@@ -5,6 +5,33 @@ import { User } from "types/generated";
 
 const Schema = mongoose.Schema;
 
+const AddressSchema = new Schema({
+  lineOne: {
+    type: String,
+    required: true,
+  },
+  lineTwo: {
+    type: String,
+    required: false,
+  },
+  city: {
+    type: String,
+    required: true,
+  },
+  state: {
+    type: String,
+    required: true,
+  },
+  zip: {
+    type: String,
+    required: true,
+  },
+  country: {
+    type: String,
+    required: true,
+  },
+});
+
 const MembershipSchema = new Schema(
   {
     role: {
@@ -36,15 +63,8 @@ const MembershipSchema = new Schema(
       last_name: { type: String },
       phone: { type: String },
       address: {
-        type: Object,
-        required: true,
-        default: {
-          lineOne: "",
-          lineTwo: "",
-          city: "",
-          state: "",
-          zip: "",
-        },
+        type: AddressSchema,
+        required: false,
       },
       image: {
         type: Schema.Types.ObjectId,
@@ -68,15 +88,8 @@ const UserSchema = new Schema<User, FindAndPaginateModel>(
       type: String,
     },
     address: {
-      type: Object,
-      required: true,
-      default: {
-        lineOne: "",
-        lineTwo: "",
-        city: "",
-        state: "",
-        zip: "",
-      },
+      type: AddressSchema,
+      required: false,
     },
     email: {
       type: String,

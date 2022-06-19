@@ -14,19 +14,19 @@ export type Scalars = {
   Int: number;
   Float: number;
   /** A country code as defined by ISO 3166-1 alpha-2 */
-  CountryCode: any;
+  CountryCode: string;
   /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
-  DateTime: any;
+  DateTime: Date;
   /** A field whose value conforms to the standard internet email address format as specified in RFC822: https://www.w3.org/Protocols/rfc822/. */
-  EmailAddress: any;
+  EmailAddress: string;
   /** A field whose value is a JSON Web Token (JWT): https://jwt.io/introduction. */
   JWT: any;
   /** A field whose value conforms with the standard mongodb object ID as described here: https://docs.mongodb.com/manual/reference/method/ObjectId/#ObjectId. Example: 5e5677d71bdc2ae76344968c */
-  ObjectID: any;
+  ObjectID: string;
   /** A field whose value conforms to the standard E.164 format as specified in: https://en.wikipedia.org/wiki/E.164. Basically this is +17895551234. */
-  PhoneNumber: any;
+  PhoneNumber: string;
   /** A field whose value conforms to the standard postal code formats for United States, United Kingdom, Germany, Canada, France, Italy, Australia, Netherlands, Spain, Denmark, Sweden, Belgium, India, Austria, Portugal, Switzerland or Luxembourg. */
-  PostalCode: any;
+  PostalCode: string;
   _Any: any;
   federation__FieldSet: any;
   link__Import: any;
@@ -46,21 +46,22 @@ export type AccountUsersArgs = {
 
 export type Address = {
   __typename?: 'Address';
-  city: Scalars['String'];
-  country: Scalars['CountryCode'];
-  lineOne: Scalars['String'];
+  _id?: Maybe<Scalars['ObjectID']>;
+  city?: Maybe<Scalars['String']>;
+  country?: Maybe<Scalars['CountryCode']>;
+  lineOne?: Maybe<Scalars['String']>;
   lineTwo?: Maybe<Scalars['String']>;
-  state: Scalars['String'];
-  zip: Scalars['PostalCode'];
+  state?: Maybe<Scalars['String']>;
+  zip?: Maybe<Scalars['PostalCode']>;
 };
 
 export type AddressInput = {
-  city: Scalars['String'];
-  country: Scalars['CountryCode'];
-  lineOne: Scalars['String'];
+  city?: InputMaybe<Scalars['String']>;
+  country?: InputMaybe<Scalars['CountryCode']>;
+  lineOne?: InputMaybe<Scalars['String']>;
   lineTwo?: InputMaybe<Scalars['String']>;
-  state: Scalars['String'];
-  zip: Scalars['PostalCode'];
+  state?: InputMaybe<Scalars['String']>;
+  zip?: InputMaybe<Scalars['PostalCode']>;
 };
 
 export enum ArrayFilterByEnum {
@@ -103,13 +104,13 @@ export enum DateFilterByEnum {
   Ne = 'NE'
 }
 
-export type DeleteUsersInput = {
-  query: UserFieldFiltersInput;
+export type DeleteResponse = {
+  __typename?: 'DeleteResponse';
+  deletedCount: Scalars['Int'];
 };
 
-export type DeleteUsersResponse = {
-  __typename?: 'DeleteUsersResponse';
-  deletedCount: Scalars['Int'];
+export type DeleteUsersInput = {
+  query: UserFieldFiltersInput;
 };
 
 /** Global configuration details. */
@@ -259,7 +260,7 @@ export enum MembershipStatusEnum {
 export type Mutation = {
   __typename?: 'Mutation';
   createUser: User;
-  deleteUsers: DeleteUsersResponse;
+  deleteUsers: DeleteResponse;
   inviteUser: User;
   loginUser: LoginUserResponse;
   switchUserMembership: LoginUserResponse;
@@ -483,8 +484,8 @@ export type ResolversTypes = ResolversObject<{
   DateFieldFilter: DateFieldFilter;
   DateFilterByEnum: DateFilterByEnum;
   DateTime: ResolverTypeWrapper<Scalars['DateTime']>;
+  DeleteResponse: ResolverTypeWrapper<DeleteResponse>;
   DeleteUsersInput: DeleteUsersInput;
-  DeleteUsersResponse: ResolverTypeWrapper<DeleteUsersResponse>;
   EmailAddress: ResolverTypeWrapper<Scalars['EmailAddress']>;
   FilterConfig: FilterConfig;
   GetUserByMembershipFilterInput: GetUserByMembershipFilterInput;
@@ -542,8 +543,8 @@ export type ResolversParentTypes = ResolversObject<{
   CreateUserInput: CreateUserInput;
   DateFieldFilter: DateFieldFilter;
   DateTime: Scalars['DateTime'];
+  DeleteResponse: DeleteResponse;
   DeleteUsersInput: DeleteUsersInput;
-  DeleteUsersResponse: DeleteUsersResponse;
   EmailAddress: Scalars['EmailAddress'];
   FilterConfig: FilterConfig;
   GetUserByMembershipFilterInput: GetUserByMembershipFilterInput;
@@ -631,12 +632,13 @@ export type AccountResolvers<ContextType = Context, ParentType extends Resolvers
 }>;
 
 export type AddressResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Address'] = ResolversParentTypes['Address']> = ResolversObject<{
-  city?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  country?: Resolver<ResolversTypes['CountryCode'], ParentType, ContextType>;
-  lineOne?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  _id?: Resolver<Maybe<ResolversTypes['ObjectID']>, ParentType, ContextType>;
+  city?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  country?: Resolver<Maybe<ResolversTypes['CountryCode']>, ParentType, ContextType>;
+  lineOne?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   lineTwo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  state?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  zip?: Resolver<ResolversTypes['PostalCode'], ParentType, ContextType>;
+  state?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  zip?: Resolver<Maybe<ResolversTypes['PostalCode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -648,7 +650,7 @@ export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversT
   name: 'DateTime';
 }
 
-export type DeleteUsersResponseResolvers<ContextType = Context, ParentType extends ResolversParentTypes['DeleteUsersResponse'] = ResolversParentTypes['DeleteUsersResponse']> = ResolversObject<{
+export type DeleteResponseResolvers<ContextType = Context, ParentType extends ResolversParentTypes['DeleteResponse'] = ResolversParentTypes['DeleteResponse']> = ResolversObject<{
   deletedCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -723,7 +725,7 @@ export type MembershipResolvers<ContextType = Context, ParentType extends Resolv
 
 export type MutationResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   createUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationCreateUserArgs, 'createUserInput'>>;
-  deleteUsers?: Resolver<ResolversTypes['DeleteUsersResponse'], ParentType, ContextType, RequireFields<MutationDeleteUsersArgs, 'deleteUsersInput'>>;
+  deleteUsers?: Resolver<ResolversTypes['DeleteResponse'], ParentType, ContextType, RequireFields<MutationDeleteUsersArgs, 'deleteUsersInput'>>;
   inviteUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationInviteUserArgs, 'inviteUserInput'>>;
   loginUser?: Resolver<ResolversTypes['LoginUserResponse'], ParentType, ContextType>;
   switchUserMembership?: Resolver<ResolversTypes['LoginUserResponse'], ParentType, ContextType, RequireFields<MutationSwitchUserMembershipArgs, 'switchUserMembershipInput'>>;
@@ -800,7 +802,7 @@ export type Resolvers<ContextType = Context> = ResolversObject<{
   Address?: AddressResolvers<ContextType>;
   CountryCode?: GraphQLScalarType;
   DateTime?: GraphQLScalarType;
-  DeleteUsersResponse?: DeleteUsersResponseResolvers<ContextType>;
+  DeleteResponse?: DeleteResponseResolvers<ContextType>;
   EmailAddress?: GraphQLScalarType;
   GetUsersResponse?: GetUsersResponseResolvers<ContextType>;
   HistoricStats?: HistoricStatsResolvers<ContextType>;
