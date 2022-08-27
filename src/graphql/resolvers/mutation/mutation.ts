@@ -4,7 +4,6 @@ import {
   MembershipStatusEnum,
   MutationResolvers,
   StringFilterByEnum,
-  UpdateUserInput,
   User as IUser,
 } from "types/generated";
 import { Helpers } from "@the-devoyage/micro-auth-helpers";
@@ -12,6 +11,83 @@ import { updateMembership } from "./update-membership";
 import { GenerateMongo } from "@the-devoyage/mongo-filter-generator";
 
 export const Mutation: MutationResolvers = {
+  createUser: async (_, args, context) => {
+    try {
+      Helpers.Resolver.CheckAuth({ context, requireUser: true });
+      Helpers.Resolver.LimitRole({
+        userRole: context.auth.payload.user?.role,
+        roleLimit: 1,
+      });
+
+      const {
+        email,
+        about,
+        image,
+        phone,
+        address,
+        last_name,
+        first_name,
+      } = args.createUserInput.payload;
+
+      const newUser = new User({
+        email,
+        about,
+        image,
+        phone,
+        address,
+        last_name,
+        first_name,
+      });
+      await newUser.save();
+
+      const user = await User.findOne<IUser>({ _id: newUser._id });
+
+      if (!user) {
+        throw new Error("Could not find newly created user.");
+      }
+
+      if (args.createUserInput.payload.memberships) {
+        const {
+          status,
+          local,
+          role,
+          account,
+          default: isAccountOwner,
+        } = args.createUserInput.payload.memberships;
+
+        const userWithMembership = await updateMembership(
+          {
+            query: {
+              _id: [
+                {
+                  filterBy: "OBJECTID" as StringFilterByEnum,
+                  string: user._id,
+                },
+              ],
+            },
+            payload: {
+              memberships: {
+                role: role ?? 100,
+                account,
+                status: status ?? ("PENDING" as MembershipStatusEnum),
+                local,
+                default: isAccountOwner,
+              },
+            },
+          },
+          context
+        );
+
+        if (!userWithMembership) {
+          throw new Error("Failed to create membership.");
+        }
+      }
+      return user;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
   loginUser: async (_parent, _args, context) => {
     try {
       Helpers.Resolver.CheckAuth({ context });
@@ -37,21 +113,21 @@ export const Mutation: MutationResolvers = {
           },
           {
             action: "OVERRIDE",
-            location: "memberships.default",
-            fieldFilter: {
-              bool: true,
-              groups: ["loginUser.and"],
-              filterBy: "EQ",
-              operator: "OR",
-            },
-          },
-          {
-            action: "OVERRIDE",
             location: "memberships.account",
             fieldFilter: {
               string: account._id,
               groups: ["loginUser.and"],
               filterBy: "OBJECTID",
+              operator: "OR",
+            },
+          },
+          {
+            action: "OVERRIDE",
+            location: "memberships.default",
+            fieldFilter: {
+              bool: true,
+              groups: ["loginUser.and"],
+              filterBy: "EQ",
               operator: "OR",
             },
           },
@@ -79,21 +155,23 @@ export const Mutation: MutationResolvers = {
       if (!membership) {
         user = await updateMembership(
           {
-            user: {
+            query: {
               _id: [
                 {
-                  filterBy: "OBJECTID",
+                  filterBy: "OBJECTID" as StringFilterByEnum,
                   string: user._id,
                 },
               ],
             },
-            memberships: {
-              role: 10,
-              account: account._id,
-              status: "ACTIVE",
-              default: true,
+            payload: {
+              memberships: {
+                role: 10,
+                account: account._id,
+                status: "ACTIVE" as MembershipStatusEnum,
+                default: true,
+              },
             },
-          } as UpdateUserInput,
+          },
           {
             auth: {
               isAuth: true,
@@ -209,15 +287,47 @@ export const Mutation: MutationResolvers = {
     try {
       Helpers.Resolver.CheckAuth({ context, requireUser: true });
 
-      let user = await User.findOne<IUser>({
-        email: args.inviteUserInput.email,
+      if (
+        args.inviteUserInput.payload.memberships?.account !==
+        context.auth.payload.account?._id
+      ) {
+        Helpers.Resolver.LimitRole({
+          roleLimit: 1,
+          userRole: context.auth.payload.user?.role,
+        });
+      }
+
+      if (Object.keys(args.inviteUserInput.query).length === 0) {
+        throw new Error("You may not invite all users to your account.");
+      }
+
+      const { filter } = GenerateMongo<IUser>({
+        fieldFilters: args.inviteUserInput.query,
       });
+
+      let user = await User.findOne<IUser>(filter);
 
       if (!user) {
         const created_by = context.auth.payload?.user?._id;
 
+        const {
+          first_name,
+          last_name,
+          phone,
+          email,
+          address,
+          image,
+          about,
+        } = args.inviteUserInput.payload;
+
         const newUser = new User({
-          email: args.inviteUserInput.email,
+          email,
+          first_name,
+          last_name,
+          phone,
+          address,
+          image,
+          about,
           created_by,
         });
 
@@ -235,16 +345,20 @@ export const Mutation: MutationResolvers = {
       const membership = user.memberships.find(
         (m) =>
           m.account._id.toString() ===
-          context.auth.payload.account?._id.toString()
+          (args.inviteUserInput.payload.memberships?.account ??
+            context.auth.payload.account?._id.toString())
       );
 
       if (membership) {
         throw new Error("This user has already been invited to this account.");
       }
 
+      const { account, role, local, status } =
+        args.inviteUserInput.payload.memberships ?? {};
+
       user = await updateMembership(
         {
-          user: {
+          query: {
             _id: [
               {
                 string: user._id.toString(),
@@ -252,11 +366,20 @@ export const Mutation: MutationResolvers = {
               },
             ],
           },
-          memberships: {
-            role: args.inviteUserInput.role ?? 100,
-            account: context.auth.payload.account?._id,
-            status: "PENDING" as MembershipStatusEnum,
-            local: args.inviteUserInput.local,
+          payload: {
+            memberships: {
+              role: role ?? 100,
+              account: account ?? context.auth.payload.account?._id!,
+              status: status ?? ("PENDING" as MembershipStatusEnum),
+              local: {
+                about: local?.about,
+                image: local?.image,
+                phone: local?.phone,
+                address: local?.address,
+                last_name: local?.last_name,
+                first_name: local?.first_name,
+              },
+            },
           },
         },
         context
@@ -278,28 +401,19 @@ export const Mutation: MutationResolvers = {
     try {
       Helpers.Resolver.CheckAuth({ context, requireUser: true });
 
-      if (
-        Object.keys(args.updateUserInput).filter(
-          (k) => k !== "user" && k !== "memberships"
-        ).length
-      ) {
-        if (args.updateUserInput.user._id?.length) {
-          for (const id of args.updateUserInput.user._id)
-            if (context.auth.payload.user?._id !== id?.string) {
-              Helpers.Resolver.LimitRole({
-                userRole: context.auth.payload?.user?.role,
-                roleLimit: 1,
-                errorMessage: "Only admins and owners may edit user details.",
-              });
-            }
-        }
-      }
-
       const { filter } = GenerateMongo<IUser>({
-        fieldFilters: args.updateUserInput.user,
+        fieldFilters: args.updateUserInput.query,
       });
 
       const user = await User.findOne<IUser>(filter);
+
+      if (user?._id.toString() !== context.auth.payload.user?._id.toString()) {
+        Helpers.Resolver.LimitRole({
+          userRole: context.auth.payload?.user?.role,
+          roleLimit: 1,
+          errorMessage: "Only admins and owners may edit user details.",
+        });
+      }
 
       if (!user) {
         throw new Error("User does not exist.");
@@ -307,9 +421,9 @@ export const Mutation: MutationResolvers = {
 
       await updateMembership(args.updateUserInput, context);
 
-      delete args.updateUserInput.memberships;
+      delete args.updateUserInput.payload.memberships;
 
-      const updateQuery = { ...args.updateUserInput };
+      const updateQuery = { ...args.updateUserInput.payload };
 
       const updatedUser = await User.findOneAndUpdate<IUser>(
         filter,
@@ -327,19 +441,17 @@ export const Mutation: MutationResolvers = {
       throw error;
     }
   },
-  deleteUser: async (_parent, args, context) => {
+  deleteUsers: async (_parent, args, context) => {
     try {
       Helpers.Resolver.CheckAuth({ context, requireUser: true });
 
-      const user = await User.findOne<IUser>({
-        _id: args.deleteUserInput._id,
+      const { filter } = GenerateMongo<IUser>({
+        fieldFilters: args.deleteUsersInput.query,
       });
 
-      if (!user) {
-        throw new Error("User not found.");
-      }
+      const users = await User.find<IUser>(filter);
 
-      if (user?._id !== context.auth.payload.user?._id) {
+      if (users.some((u) => u?._id !== context.auth.payload.user?._id)) {
         Helpers.Resolver.LimitRole({
           userRole: context.auth.payload?.user?.role,
           roleLimit: 1,
@@ -347,15 +459,13 @@ export const Mutation: MutationResolvers = {
         });
       }
 
-      const deletedUser = await User.deleteOne({
-        _id: args.deleteUserInput._id,
-      });
+      const deletedUsers = await User.deleteMany(filter);
 
-      if (deletedUser.deletedCount === 0) {
+      if (deletedUsers.deletedCount === 0) {
         throw new Error("Something went wrong when deleting the user.");
       }
 
-      return user;
+      return { deletedCount: deletedUsers.deletedCount };
     } catch (error) {
       console.log(error);
       throw error;

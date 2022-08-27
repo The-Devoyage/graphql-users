@@ -1,18 +1,25 @@
 import { gql } from "apollo-server-express";
 
 export const Mutation = gql`
-  input InviteUserInput {
-    email: String!
-    role: Int
-    local: LocalMembershipInput
+  input UpdateUserInput {
+    query: UserFieldFiltersInput!
+    payload: UserInput!
   }
 
-  input UpdateUserInput {
-    user: GetUsersInput!
+  input CreateUserInput {
+    payload: UserInput!
+  }
+
+  input InviteUserInput {
+    query: UserFieldFiltersInput!
+    payload: UserInput!
+  }
+
+  input UserInput {
     last_name: String
     first_name: String
-    email: String
-    phone: String
+    email: EmailAddress
+    phone: PhoneNumber
     address: AddressInput
     image: ObjectID
     about: String
@@ -30,26 +37,31 @@ export const Mutation = gql`
   input LocalMembershipInput {
     first_name: String
     last_name: String
-    phone: String
+    phone: PhoneNumber
     address: AddressInput
     image: ObjectID
     about: String
   }
 
   input AddressInput {
-    lineOne: String!
+    lineOne: String
     lineTwo: String
-    city: String!
-    state: String!
-    zip: String!
+    city: String
+    state: String
+    zip: PostalCode
+    country: CountryCode
   }
 
-  input DeleteUserInput {
-    _id: ObjectID!
+  input DeleteUsersInput {
+    query: UserFieldFiltersInput!
   }
 
   input SwitchUserMembershipInput {
     membership_id: ObjectID!
+  }
+
+  type DeleteResponse @shareable {
+    deletedCount: Int!
   }
 
   type LoginUserResponse {
@@ -64,6 +76,7 @@ export const Mutation = gql`
     ): LoginUserResponse!
     updateUser(updateUserInput: UpdateUserInput!): User!
     inviteUser(inviteUserInput: InviteUserInput!): User!
-    deleteUser(deleteUserInput: DeleteUserInput!): User!
+    deleteUsers(deleteUsersInput: DeleteUsersInput!): DeleteResponse!
+    createUser(createUserInput: CreateUserInput!): User!
   }
 `;

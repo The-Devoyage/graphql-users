@@ -29,12 +29,18 @@ export const Query: QueryResolvers = {
     try {
       Helpers.Resolver.CheckAuth({ context });
 
-      const { filter, options } = GenerateMongo({
-        fieldFilters: args.getUsersInput,
+      const { filter, options } = GenerateMongo<IUser>({
+        fieldFilters: args.getUsersInput.query,
         config: args.getUsersInput.config,
       });
 
-      const users = await User.findAndPaginate<IUser>(filter, options);
+      const users = await User.findAndPaginate<IUser>(filter, options, {
+        history: {
+          filter: {
+            interval: args.getUsersInput.config?.history?.interval ?? [],
+          },
+        },
+      });
 
       return users;
     } catch (error) {

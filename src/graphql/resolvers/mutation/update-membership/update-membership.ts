@@ -8,9 +8,9 @@ export const updateMembership = async (
   updateUserInput: UpdateUserInput,
   context: Context
 ): Promise<IUser | null> => {
-  if (updateUserInput.memberships) {
+  if (updateUserInput.payload.memberships) {
     const { filter } = GenerateMongo<IUser>({
-      fieldFilters: updateUserInput.user,
+      fieldFilters: updateUserInput.query,
     });
 
     const user = await User.findOne<IUser>(filter);
@@ -21,7 +21,8 @@ export const updateMembership = async (
 
     const membership = user?.memberships.find(
       (m) =>
-        m.account.toString() === updateUserInput.memberships?.account.toString()
+        m.account.toString() ===
+        updateUserInput.payload.memberships?.account.toString()
     );
 
     const isInvited =
@@ -29,10 +30,13 @@ export const updateMembership = async (
       user.email === context.auth.payload.account?.email;
 
     const hasInvited =
-      updateUserInput.memberships.account.toString() ===
+      updateUserInput.payload.memberships.account.toString() ===
       context.auth.payload.account?._id;
 
-    if (updateUserInput.memberships.default !== undefined && !isInvited) {
+    if (
+      updateUserInput.payload.memberships.default !== undefined &&
+      !isInvited
+    ) {
       Helpers.Resolver.LimitRole({
         userRole: context.auth.payload?.user?.role,
         roleLimit: 1,
@@ -42,8 +46,8 @@ export const updateMembership = async (
     }
 
     if (
-      updateUserInput.memberships.role &&
-      updateUserInput.memberships.role < 10
+      updateUserInput.payload.memberships.role &&
+      updateUserInput.payload.memberships.role < 10
     ) {
       Helpers.Resolver.LimitRole({
         userRole: context.auth.payload?.user?.role,
@@ -61,7 +65,7 @@ export const updateMembership = async (
       });
     }
 
-    if (updateUserInput.memberships.status) {
+    if (updateUserInput.payload.memberships.status) {
       switch (membership?.status) {
         case "REVOKED": {
           if (!hasInvited) {
@@ -72,7 +76,7 @@ export const updateMembership = async (
             });
           } else if (
             hasInvited &&
-            updateUserInput.memberships.status !== "PENDING"
+            updateUserInput.payload.memberships.status !== "PENDING"
           ) {
             Helpers.Resolver.LimitRole({
               userRole: context.auth.payload?.user?.role,
@@ -86,9 +90,9 @@ export const updateMembership = async (
         case "ACTIVE":
         case "INACTIVE": {
           if (
-            updateUserInput.memberships.status !== "ACTIVE" &&
-            updateUserInput.memberships.status !== "INACTIVE" &&
-            updateUserInput.memberships.status !== "REVOKED"
+            updateUserInput.payload.memberships.status !== "ACTIVE" &&
+            updateUserInput.payload.memberships.status !== "INACTIVE" &&
+            updateUserInput.payload.memberships.status !== "REVOKED"
           ) {
             Helpers.Resolver.LimitRole({
               userRole: context.auth.payload?.user?.role,
@@ -98,8 +102,8 @@ export const updateMembership = async (
           } else {
             if (isInvited && !hasInvited) {
               if (
-                updateUserInput.memberships.status !== "ACTIVE" &&
-                updateUserInput.memberships.status !== "INACTIVE"
+                updateUserInput.payload.memberships.status !== "ACTIVE" &&
+                updateUserInput.payload.memberships.status !== "INACTIVE"
               ) {
                 Helpers.Resolver.LimitRole({
                   userRole: context.auth.payload?.user?.role,
@@ -109,7 +113,7 @@ export const updateMembership = async (
                 });
               }
             } else if (hasInvited && !isInvited) {
-              if (updateUserInput.memberships.status !== "REVOKED") {
+              if (updateUserInput.payload.memberships.status !== "REVOKED") {
                 Helpers.Resolver.LimitRole({
                   userRole: context.auth.payload?.user?.role,
                   roleLimit: 1,
@@ -128,7 +132,10 @@ export const updateMembership = async (
           break;
         }
         default: {
-          if (!isInvited && updateUserInput.memberships?.status !== "PENDING") {
+          if (
+            !isInvited &&
+            updateUserInput.payload.memberships?.status !== "PENDING"
+          ) {
             Helpers.Resolver.LimitRole({
               userRole: context.auth.payload?.user?.role,
               roleLimit: 1,
@@ -140,13 +147,34 @@ export const updateMembership = async (
     }
 
     if (
-      membership?.default === true &&
-      updateUserInput.memberships.role &&
-      updateUserInput.memberships.role > 10
+      updateUserInput.payload.memberships.default === true &&
+      updateUserInput.payload.memberships.role &&
+      updateUserInput.payload.memberships.role > 10
     ) {
       throw new Error(
         "Default memberships may not have a role greater than 10."
       );
+    }
+
+    if (
+      updateUserInput.payload.memberships.default === true &&
+      membership?.default !== true
+    ) {
+      const accountHasDefaultUser = await User.exists({
+        memberships: {
+          $elemMatch: {
+            $and: [
+              {
+                account: membership?.account._id,
+              },
+              { default: true },
+            ],
+          },
+        },
+      });
+      if (accountHasDefaultUser) {
+        throw new Error("This account already has a default membership.");
+      }
     }
 
     if (membership) {
@@ -158,16 +186,17 @@ export const updateMembership = async (
         {
           $set: {
             "memberships.$.account":
-              updateUserInput.memberships.account.toString() ??
+              updateUserInput.payload.memberships.account.toString() ??
               membership?.account,
             "memberships.$.role":
-              updateUserInput.memberships.role ?? membership?.role,
+              updateUserInput.payload.memberships.role ?? membership?.role,
             "memberships.$.status":
-              updateUserInput.memberships.status ?? membership?.status,
+              updateUserInput.payload.memberships.status ?? membership?.status,
             "memberships.$.local":
-              updateUserInput.memberships.local ?? membership?.local,
+              updateUserInput.payload.memberships.local ?? membership?.local,
             "memberships.$.default":
-              updateUserInput.memberships.default ?? membership?.default,
+              updateUserInput.payload.memberships.default ??
+              membership?.default,
           },
         },
         {
@@ -187,11 +216,11 @@ export const updateMembership = async (
         {
           $addToSet: {
             memberships: {
-              account: updateUserInput.memberships.account,
-              role: updateUserInput.memberships.role,
-              status: updateUserInput.memberships.status,
-              local: updateUserInput.memberships.local,
-              default: updateUserInput.memberships.default,
+              account: updateUserInput.payload.memberships.account,
+              role: updateUserInput.payload.memberships.role,
+              status: updateUserInput.payload.memberships.status,
+              local: updateUserInput.payload.memberships.local,
+              default: updateUserInput.payload.memberships.default,
               created_by: context.auth.payload.user?._id,
             },
           },

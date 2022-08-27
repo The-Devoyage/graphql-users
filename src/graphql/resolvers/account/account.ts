@@ -5,8 +5,8 @@ import { AccountResolvers, User as IUser } from "types/generated";
 export const Account: AccountResolvers = {
   users: async (account, args) => {
     try {
-      const { filter, options } = GenerateMongo({
-        fieldFilters: args.getUsersInput,
+      const { filter, options } = GenerateMongo<IUser>({
+        fieldFilters: args.getUsersInput.query,
         config: {
           pagination: args.getUsersInput.config?.pagination,
         },

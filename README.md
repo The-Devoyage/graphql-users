@@ -2,9 +2,9 @@
 
 The Devoyage's `graphql-users` repository is a production ready "Users and Memberships" Micro Service used to start or extend any API. Enable features like User Management, User Details, Account Memberships, and Roles simply by spinning up this service with an API. (Or use it as a starter for your next Users and Memberships API).
 
-## License
+## Support / Purchase MIT License
 
-This repository provides a GPL License by default. If you want to use this product in a private commericial setting, you may purchase the MIT Licensed Version [Here!](https://thedevoyage.gumroad.com/l/graphql-users)
+This repository provides a GPL License by default. If you want to use this product in a private setting, you may purchase the MIT Licensed Version [Here!](https://thedevoyage.gumroad.com/l/graphql-users) -- thanks for your support!
 
 ## Features
 
@@ -173,16 +173,20 @@ Include a role, to limit the user's capability within an account.
 ```json
 {
   "updateUserInput": {
-    "user": {
-      "email": {
-        "filterBy": "MATCH",
-        "string": "nickmclean@thedevoyage.com"
-      }
+    "query": {
+      "email": [
+        {
+          "filterBy": "MATCH",
+          "string": "nickmclean@thedevoyage.com"
+        }
+      ]
     },
-    "memberships": {
-      "account": "my_account_id",
-      "role": 100,
-      "status": "PENDING" // "REVOKED"
+    "payload": {
+      "memberships": {
+        "account": "my_account_id",
+        "role": 100,
+        "status": "PENDING" // "REVOKED"
+      }
     }
   }
 }
@@ -197,15 +201,17 @@ You may switch the status of any of your memberships to `ACTIVE` or `INACTIVE`, 
 ```json
 {
   "updateUserInput": {
-    "user": {
+    "query": {
       "_id": {
         "filterBy": "OBJECTID",
         "string": "my_unique_object_id"
       }
     },
-    "memberships": {
-      "account": "my_account_id",
-      "status": "ACTIVE" // "INACTIVE"
+    "payload": {
+      "memberships": {
+        "account": "my_account_id",
+        "status": "ACTIVE" // "INACTIVE"
+      }
     }
   }
 }
@@ -224,3 +230,11 @@ Send a mutation with the following variables to the `switchUserMembership` resol
 ```
 
 A response with a new JWT will be sent back, granting access to the account as the user.
+
+### 5. Creating an Admin User (Role 1)
+
+To create an admin user you must have access to the mongo database as the system does not create admin users by default. Once you have access to the mongo database, simply change the user's membership role to 1. 
+
+```
+db.users.findOneAndUpdate({email: "admin@email.com", "memberships._id": ObjectId("12345")}, {$set: {"memberships.$.role": 1}})
+```
