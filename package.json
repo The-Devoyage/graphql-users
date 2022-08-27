@@ -25,6 +25,7 @@
   "dependencies": {
     "@apollo/subgraph": "^2.0.2",
     "@the-devoyage/micro-auth-helpers": "^0.1.22",
+    "@the-devoyage/mongo-filter-generator": "^0.4.0",
     "apollo-server": "^3.7.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
