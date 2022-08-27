@@ -2,26 +2,31 @@ import { gql } from "apollo-server-express";
 
 export const Query = gql`
   input GetUsersInput {
+    query: UserFieldFiltersInput!
+    config: FilterConfig
+  }
+
+  input UserFieldFiltersInput {
     created_by: [StringFieldFilter]
     email: [StringFieldFilter]
     _id: [StringFieldFilter]
     first_name: [StringFieldFilter]
     last_name: [StringFieldFilter]
     phone: [StringFieldFilter]
-    config: FilterConfig
     image: [StringFieldFilter]
     createdAt: [DateFieldFilter]
     updatedAt: [DateFieldFilter]
-    memberships: [GetUserByMembershipInput]
+    memberships: [GetUserByMembershipFilterInput]
   }
 
-  input GetUserByMembershipInput {
+  input GetUserByMembershipFilterInput {
     status: [StringFieldFilter]
     _id: StringFieldFilter
     createdAt: DateFieldFilter
     updatedAt: DateFieldFilter
     role: [IntFieldFilter]
     account: StringFieldFilter
+    default: BooleanFieldFilter
   }
 
   type GetUsersResponse {

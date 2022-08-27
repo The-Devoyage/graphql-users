@@ -8,6 +8,9 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+    "lib": [
+      "es2019"
+    ],
     "paths": {
       "@src/*": [
         "src/*"

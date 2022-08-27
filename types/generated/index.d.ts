@@ -1,5 +1,5 @@
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
-import { Context } from '@the-devoyage/micro-auth-helpers';
+import { Context } from '../context';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -13,15 +13,29 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  DateTime: any;
-  ObjectID: any;
+  /** A country code as defined by ISO 3166-1 alpha-2 */
+  CountryCode: string;
+  /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
+  DateTime: Date;
+  /** A field whose value conforms to the standard internet email address format as specified in RFC822: https://www.w3.org/Protocols/rfc822/. */
+  EmailAddress: string;
+  /** A field whose value is a JSON Web Token (JWT): https://jwt.io/introduction. */
+  JWT: any;
+  /** A field whose value conforms with the standard mongodb object ID as described here: https://docs.mongodb.com/manual/reference/method/ObjectId/#ObjectId. Example: 5e5677d71bdc2ae76344968c */
+  ObjectID: string;
+  /** A field whose value conforms to the standard E.164 format as specified in: https://en.wikipedia.org/wiki/E.164. Basically this is +17895551234. */
+  PhoneNumber: string;
+  /** A field whose value conforms to the standard postal code formats for United States, United Kingdom, Germany, Canada, France, Italy, Australia, Netherlands, Spain, Denmark, Sweden, Belgium, India, Austria, Portugal, Switzerland or Luxembourg. */
+  PostalCode: string;
   _Any: any;
+  federation__FieldSet: any;
+  link__Import: any;
 };
 
 export type Account = {
   __typename?: 'Account';
   _id: Scalars['ObjectID'];
-  email: Scalars['String'];
+  email: Scalars['EmailAddress'];
   users: GetUsersResponse;
 };
 
@@ -32,19 +46,22 @@ export type AccountUsersArgs = {
 
 export type Address = {
   __typename?: 'Address';
-  city: Scalars['String'];
-  lineOne: Scalars['String'];
+  _id?: Maybe<Scalars['ObjectID']>;
+  city?: Maybe<Scalars['String']>;
+  country?: Maybe<Scalars['CountryCode']>;
+  lineOne?: Maybe<Scalars['String']>;
   lineTwo?: Maybe<Scalars['String']>;
-  state: Scalars['String'];
-  zip: Scalars['String'];
+  state?: Maybe<Scalars['String']>;
+  zip?: Maybe<Scalars['PostalCode']>;
 };
 
 export type AddressInput = {
-  city: Scalars['String'];
-  lineOne: Scalars['String'];
+  city?: InputMaybe<Scalars['String']>;
+  country?: InputMaybe<Scalars['CountryCode']>;
+  lineOne?: InputMaybe<Scalars['String']>;
   lineTwo?: InputMaybe<Scalars['String']>;
-  state: Scalars['String'];
-  zip: Scalars['String'];
+  state?: InputMaybe<Scalars['String']>;
+  zip?: InputMaybe<Scalars['PostalCode']>;
 };
 
 export enum ArrayFilterByEnum {
@@ -66,6 +83,10 @@ export enum BooleanFilterByEnum {
   Ne = 'NE'
 }
 
+export type CreateUserInput = {
+  payload: UserInput;
+};
+
 /** Filter for documents which have a property that is a Date. */
 export type DateFieldFilter = {
   date: Scalars['DateTime'];
@@ -83,36 +104,34 @@ export enum DateFilterByEnum {
   Ne = 'NE'
 }
 
-export type DeleteUserInput = {
-  _id: Scalars['ObjectID'];
+export type DeleteResponse = {
+  __typename?: 'DeleteResponse';
+  deletedCount: Scalars['Int'];
+};
+
+export type DeleteUsersInput = {
+  query: UserFieldFiltersInput;
 };
 
 /** Global configuration details. */
 export type FilterConfig = {
+  history?: InputMaybe<HistoryFilterInput>;
   pagination?: InputMaybe<Pagination>;
 };
 
-export type GetUserByMembershipInput = {
+export type GetUserByMembershipFilterInput = {
   _id?: InputMaybe<StringFieldFilter>;
   account?: InputMaybe<StringFieldFilter>;
   createdAt?: InputMaybe<DateFieldFilter>;
+  default?: InputMaybe<BooleanFieldFilter>;
   role?: InputMaybe<Array<InputMaybe<IntFieldFilter>>>;
   status?: InputMaybe<Array<InputMaybe<StringFieldFilter>>>;
   updatedAt?: InputMaybe<DateFieldFilter>;
 };
 
 export type GetUsersInput = {
-  _id?: InputMaybe<Array<InputMaybe<StringFieldFilter>>>;
   config?: InputMaybe<FilterConfig>;
-  createdAt?: InputMaybe<Array<InputMaybe<DateFieldFilter>>>;
-  created_by?: InputMaybe<Array<InputMaybe<StringFieldFilter>>>;
-  email?: InputMaybe<Array<InputMaybe<StringFieldFilter>>>;
-  first_name?: InputMaybe<Array<InputMaybe<StringFieldFilter>>>;
-  image?: InputMaybe<Array<InputMaybe<StringFieldFilter>>>;
-  last_name?: InputMaybe<Array<InputMaybe<StringFieldFilter>>>;
-  memberships?: InputMaybe<Array<InputMaybe<GetUserByMembershipInput>>>;
-  phone?: InputMaybe<Array<InputMaybe<StringFieldFilter>>>;
-  updatedAt?: InputMaybe<Array<InputMaybe<DateFieldFilter>>>;
+  query: UserFieldFiltersInput;
 };
 
 export type GetUsersResponse = {
@@ -120,6 +139,43 @@ export type GetUsersResponse = {
   data: Array<User>;
   stats: Stats;
 };
+
+export type HistoricStats = {
+  __typename?: 'HistoricStats';
+  _id?: Maybe<HistoricStatsId>;
+  total?: Maybe<Scalars['Int']>;
+};
+
+export type HistoricStatsId = {
+  __typename?: 'HistoricStatsId';
+  DAY_OF_MONTH?: Maybe<Scalars['Int']>;
+  DAY_OF_WEEK?: Maybe<Scalars['Int']>;
+  DAY_OF_YEAR?: Maybe<Scalars['Int']>;
+  HOUR?: Maybe<Scalars['Int']>;
+  MILLISECONDS?: Maybe<Scalars['Int']>;
+  MINUTES?: Maybe<Scalars['Int']>;
+  MONTH?: Maybe<Scalars['Int']>;
+  SECONDS?: Maybe<Scalars['Int']>;
+  WEEK?: Maybe<Scalars['Int']>;
+  YEAR?: Maybe<Scalars['Int']>;
+};
+
+export type HistoryFilterInput = {
+  interval: Array<HistoryFilterIntervalEnum>;
+};
+
+export enum HistoryFilterIntervalEnum {
+  DayOfMonth = 'DAY_OF_MONTH',
+  DayOfWeek = 'DAY_OF_WEEK',
+  DayOfYear = 'DAY_OF_YEAR',
+  Hour = 'HOUR',
+  Milliseconds = 'MILLISECONDS',
+  Minutes = 'MINUTES',
+  Month = 'MONTH',
+  Seconds = 'SECONDS',
+  Week = 'WEEK',
+  Year = 'YEAR'
+}
 
 /** Filter for documents which have a property that is an Integer. */
 export type IntFieldFilter = {
@@ -139,9 +195,8 @@ export enum IntFilterByEnum {
 }
 
 export type InviteUserInput = {
-  email: Scalars['String'];
-  local?: InputMaybe<LocalMembershipInput>;
-  role?: InputMaybe<Scalars['Int']>;
+  payload: UserInput;
+  query: UserFieldFiltersInput;
 };
 
 export type LocalMembershipInput = {
@@ -150,7 +205,7 @@ export type LocalMembershipInput = {
   first_name?: InputMaybe<Scalars['String']>;
   image?: InputMaybe<Scalars['ObjectID']>;
   last_name?: InputMaybe<Scalars['String']>;
-  phone?: InputMaybe<Scalars['String']>;
+  phone?: InputMaybe<Scalars['PhoneNumber']>;
 };
 
 export type LocalUserDetails = {
@@ -160,7 +215,7 @@ export type LocalUserDetails = {
   first_name?: Maybe<Scalars['String']>;
   image?: Maybe<Media>;
   last_name?: Maybe<Scalars['String']>;
-  phone?: Maybe<Scalars['String']>;
+  phone?: Maybe<Scalars['PhoneNumber']>;
 };
 
 export type LoginUserResponse = {
@@ -204,7 +259,8 @@ export enum MembershipStatusEnum {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  deleteUser: User;
+  createUser: User;
+  deleteUsers: DeleteResponse;
   inviteUser: User;
   loginUser: LoginUserResponse;
   switchUserMembership: LoginUserResponse;
@@ -212,8 +268,13 @@ export type Mutation = {
 };
 
 
-export type MutationDeleteUserArgs = {
-  deleteUserInput: DeleteUserInput;
+export type MutationCreateUserArgs = {
+  createUserInput: CreateUserInput;
+};
+
+
+export type MutationDeleteUsersArgs = {
+  deleteUsersInput: DeleteUsersInput;
 };
 
 
@@ -256,6 +317,7 @@ export type QueryGetUsersArgs = {
 export type Stats = {
   __typename?: 'Stats';
   cursor?: Maybe<Scalars['DateTime']>;
+  history?: Maybe<Array<HistoricStats>>;
   page?: Maybe<Scalars['Int']>;
   remaining?: Maybe<Scalars['Int']>;
   total?: Maybe<Scalars['Int']>;
@@ -289,15 +351,8 @@ export type SwitchUserMembershipInput = {
 };
 
 export type UpdateUserInput = {
-  about?: InputMaybe<Scalars['String']>;
-  address?: InputMaybe<AddressInput>;
-  email?: InputMaybe<Scalars['String']>;
-  first_name?: InputMaybe<Scalars['String']>;
-  image?: InputMaybe<Scalars['ObjectID']>;
-  last_name?: InputMaybe<Scalars['String']>;
-  memberships?: InputMaybe<MembershipInput>;
-  phone?: InputMaybe<Scalars['String']>;
-  user: GetUsersInput;
+  payload: UserInput;
+  query: UserFieldFiltersInput;
 };
 
 export type User = {
@@ -307,14 +362,45 @@ export type User = {
   address?: Maybe<Address>;
   createdAt: Scalars['DateTime'];
   created_by?: Maybe<User>;
-  email: Scalars['String'];
+  email: Scalars['EmailAddress'];
   first_name?: Maybe<Scalars['String']>;
   image?: Maybe<Media>;
   last_name?: Maybe<Scalars['String']>;
   memberships: Array<Membership>;
-  phone?: Maybe<Scalars['String']>;
+  phone?: Maybe<Scalars['PhoneNumber']>;
   updatedAt: Scalars['DateTime'];
 };
+
+export type UserFieldFiltersInput = {
+  _id?: InputMaybe<Array<InputMaybe<StringFieldFilter>>>;
+  createdAt?: InputMaybe<Array<InputMaybe<DateFieldFilter>>>;
+  created_by?: InputMaybe<Array<InputMaybe<StringFieldFilter>>>;
+  email?: InputMaybe<Array<InputMaybe<StringFieldFilter>>>;
+  first_name?: InputMaybe<Array<InputMaybe<StringFieldFilter>>>;
+  image?: InputMaybe<Array<InputMaybe<StringFieldFilter>>>;
+  last_name?: InputMaybe<Array<InputMaybe<StringFieldFilter>>>;
+  memberships?: InputMaybe<Array<InputMaybe<GetUserByMembershipFilterInput>>>;
+  phone?: InputMaybe<Array<InputMaybe<StringFieldFilter>>>;
+  updatedAt?: InputMaybe<Array<InputMaybe<DateFieldFilter>>>;
+};
+
+export type UserInput = {
+  about?: InputMaybe<Scalars['String']>;
+  address?: InputMaybe<AddressInput>;
+  email?: InputMaybe<Scalars['EmailAddress']>;
+  first_name?: InputMaybe<Scalars['String']>;
+  image?: InputMaybe<Scalars['ObjectID']>;
+  last_name?: InputMaybe<Scalars['String']>;
+  memberships?: InputMaybe<MembershipInput>;
+  phone?: InputMaybe<Scalars['PhoneNumber']>;
+};
+
+export enum Link__Purpose {
+  /** `EXECUTION` features provide metadata necessary for operation execution. */
+  Execution = 'EXECUTION',
+  /** `SECURITY` features provide metadata necessary to securely resolve fields. */
+  Security = 'SECURITY'
+}
 
 export type WithIndex<TObject> = TObject & Record<string, any>;
 export type ResolversObject<TObject> = WithIndex<TObject>;
@@ -393,18 +479,27 @@ export type ResolversTypes = ResolversObject<{
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   BooleanFieldFilter: BooleanFieldFilter;
   BooleanFilterByEnum: BooleanFilterByEnum;
+  CountryCode: ResolverTypeWrapper<Scalars['CountryCode']>;
+  CreateUserInput: CreateUserInput;
   DateFieldFilter: DateFieldFilter;
   DateFilterByEnum: DateFilterByEnum;
   DateTime: ResolverTypeWrapper<Scalars['DateTime']>;
-  DeleteUserInput: DeleteUserInput;
+  DeleteResponse: ResolverTypeWrapper<DeleteResponse>;
+  DeleteUsersInput: DeleteUsersInput;
+  EmailAddress: ResolverTypeWrapper<Scalars['EmailAddress']>;
   FilterConfig: FilterConfig;
-  GetUserByMembershipInput: GetUserByMembershipInput;
+  GetUserByMembershipFilterInput: GetUserByMembershipFilterInput;
   GetUsersInput: GetUsersInput;
   GetUsersResponse: ResolverTypeWrapper<GetUsersResponse>;
+  HistoricStats: ResolverTypeWrapper<HistoricStats>;
+  HistoricStatsId: ResolverTypeWrapper<HistoricStatsId>;
+  HistoryFilterInput: HistoryFilterInput;
+  HistoryFilterIntervalEnum: HistoryFilterIntervalEnum;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   IntFieldFilter: IntFieldFilter;
   IntFilterByEnum: IntFilterByEnum;
   InviteUserInput: InviteUserInput;
+  JWT: ResolverTypeWrapper<Scalars['JWT']>;
   LocalMembershipInput: LocalMembershipInput;
   LocalUserDetails: ResolverTypeWrapper<LocalUserDetails>;
   LoginUserResponse: ResolverTypeWrapper<LoginUserResponse>;
@@ -416,6 +511,8 @@ export type ResolversTypes = ResolversObject<{
   ObjectID: ResolverTypeWrapper<Scalars['ObjectID']>;
   OperatorFieldConfigEnum: OperatorFieldConfigEnum;
   Pagination: Pagination;
+  PhoneNumber: ResolverTypeWrapper<Scalars['PhoneNumber']>;
+  PostalCode: ResolverTypeWrapper<Scalars['PostalCode']>;
   Query: ResolverTypeWrapper<{}>;
   Stats: ResolverTypeWrapper<Stats>;
   String: ResolverTypeWrapper<Scalars['String']>;
@@ -425,9 +522,14 @@ export type ResolversTypes = ResolversObject<{
   SwitchUserMembershipInput: SwitchUserMembershipInput;
   UpdateUserInput: UpdateUserInput;
   User: ResolverTypeWrapper<User>;
+  UserFieldFiltersInput: UserFieldFiltersInput;
+  UserInput: UserInput;
   _Any: ResolverTypeWrapper<Scalars['_Any']>;
   _Entity: ResolversTypes['Account'] | ResolversTypes['Media'] | ResolversTypes['User'];
   _Service: ResolverTypeWrapper<_Service>;
+  federation__FieldSet: ResolverTypeWrapper<Scalars['federation__FieldSet']>;
+  link__Import: ResolverTypeWrapper<Scalars['link__Import']>;
+  link__Purpose: Link__Purpose;
 }>;
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -437,16 +539,24 @@ export type ResolversParentTypes = ResolversObject<{
   AddressInput: AddressInput;
   Boolean: Scalars['Boolean'];
   BooleanFieldFilter: BooleanFieldFilter;
+  CountryCode: Scalars['CountryCode'];
+  CreateUserInput: CreateUserInput;
   DateFieldFilter: DateFieldFilter;
   DateTime: Scalars['DateTime'];
-  DeleteUserInput: DeleteUserInput;
+  DeleteResponse: DeleteResponse;
+  DeleteUsersInput: DeleteUsersInput;
+  EmailAddress: Scalars['EmailAddress'];
   FilterConfig: FilterConfig;
-  GetUserByMembershipInput: GetUserByMembershipInput;
+  GetUserByMembershipFilterInput: GetUserByMembershipFilterInput;
   GetUsersInput: GetUsersInput;
   GetUsersResponse: GetUsersResponse;
+  HistoricStats: HistoricStats;
+  HistoricStatsId: HistoricStatsId;
+  HistoryFilterInput: HistoryFilterInput;
   Int: Scalars['Int'];
   IntFieldFilter: IntFieldFilter;
   InviteUserInput: InviteUserInput;
+  JWT: Scalars['JWT'];
   LocalMembershipInput: LocalMembershipInput;
   LocalUserDetails: LocalUserDetails;
   LoginUserResponse: LoginUserResponse;
@@ -456,6 +566,8 @@ export type ResolversParentTypes = ResolversObject<{
   Mutation: {};
   ObjectID: Scalars['ObjectID'];
   Pagination: Pagination;
+  PhoneNumber: Scalars['PhoneNumber'];
+  PostalCode: Scalars['PostalCode'];
   Query: {};
   Stats: Stats;
   String: Scalars['String'];
@@ -464,33 +576,87 @@ export type ResolversParentTypes = ResolversObject<{
   SwitchUserMembershipInput: SwitchUserMembershipInput;
   UpdateUserInput: UpdateUserInput;
   User: User;
+  UserFieldFiltersInput: UserFieldFiltersInput;
+  UserInput: UserInput;
   _Any: Scalars['_Any'];
   _Entity: ResolversParentTypes['Account'] | ResolversParentTypes['Media'] | ResolversParentTypes['User'];
   _Service: _Service;
+  federation__FieldSet: Scalars['federation__FieldSet'];
+  link__Import: Scalars['link__Import'];
 }>;
 
-export type ExtendsDirectiveArgs = { };
+export type Federation__ExtendsDirectiveArgs = { };
 
-export type ExtendsDirectiveResolver<Result, Parent, ContextType = Context, Args = ExtendsDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
+export type Federation__ExtendsDirectiveResolver<Result, Parent, ContextType = Context, Args = Federation__ExtendsDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
+
+export type Federation__InaccessibleDirectiveArgs = { };
+
+export type Federation__InaccessibleDirectiveResolver<Result, Parent, ContextType = Context, Args = Federation__InaccessibleDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
+
+export type Federation__OverrideDirectiveArgs = {
+  from: Scalars['String'];
+};
+
+export type Federation__OverrideDirectiveResolver<Result, Parent, ContextType = Context, Args = Federation__OverrideDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
+
+export type Federation__ProvidesDirectiveArgs = {
+  fields: Scalars['federation__FieldSet'];
+};
+
+export type Federation__ProvidesDirectiveResolver<Result, Parent, ContextType = Context, Args = Federation__ProvidesDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
+
+export type Federation__TagDirectiveArgs = {
+  name: Scalars['String'];
+};
+
+export type Federation__TagDirectiveResolver<Result, Parent, ContextType = Context, Args = Federation__TagDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
+
+export type LinkDirectiveArgs = {
+  as?: Maybe<Scalars['String']>;
+  for?: Maybe<Link__Purpose>;
+  import?: Maybe<Array<Maybe<Scalars['link__Import']>>>;
+  url?: Maybe<Scalars['String']>;
+};
+
+export type LinkDirectiveResolver<Result, Parent, ContextType = Context, Args = LinkDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
+
+export type ShareableDirectiveArgs = { };
+
+export type ShareableDirectiveResolver<Result, Parent, ContextType = Context, Args = ShareableDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
 
 export type AccountResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Account'] = ResolversParentTypes['Account']> = ResolversObject<{
   _id?: Resolver<ResolversTypes['ObjectID'], ParentType, ContextType>;
-  email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  email?: Resolver<ResolversTypes['EmailAddress'], ParentType, ContextType>;
   users?: Resolver<ResolversTypes['GetUsersResponse'], ParentType, ContextType, RequireFields<AccountUsersArgs, 'getUsersInput'>>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type AddressResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Address'] = ResolversParentTypes['Address']> = ResolversObject<{
-  city?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  lineOne?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  _id?: Resolver<Maybe<ResolversTypes['ObjectID']>, ParentType, ContextType>;
+  city?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  country?: Resolver<Maybe<ResolversTypes['CountryCode']>, ParentType, ContextType>;
+  lineOne?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   lineTwo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  state?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  zip?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  state?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  zip?: Resolver<Maybe<ResolversTypes['PostalCode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export interface CountryCodeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['CountryCode'], any> {
+  name: 'CountryCode';
+}
+
 export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['DateTime'], any> {
   name: 'DateTime';
+}
+
+export type DeleteResponseResolvers<ContextType = Context, ParentType extends ResolversParentTypes['DeleteResponse'] = ResolversParentTypes['DeleteResponse']> = ResolversObject<{
+  deletedCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export interface EmailAddressScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['EmailAddress'], any> {
+  name: 'EmailAddress';
 }
 
 export type GetUsersResponseResolvers<ContextType = Context, ParentType extends ResolversParentTypes['GetUsersResponse'] = ResolversParentTypes['GetUsersResponse']> = ResolversObject<{
@@ -499,13 +665,37 @@ export type GetUsersResponseResolvers<ContextType = Context, ParentType extends 
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type HistoricStatsResolvers<ContextType = Context, ParentType extends ResolversParentTypes['HistoricStats'] = ResolversParentTypes['HistoricStats']> = ResolversObject<{
+  _id?: Resolver<Maybe<ResolversTypes['HistoricStatsId']>, ParentType, ContextType>;
+  total?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type HistoricStatsIdResolvers<ContextType = Context, ParentType extends ResolversParentTypes['HistoricStatsId'] = ResolversParentTypes['HistoricStatsId']> = ResolversObject<{
+  DAY_OF_MONTH?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  DAY_OF_WEEK?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  DAY_OF_YEAR?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  HOUR?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  MILLISECONDS?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  MINUTES?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  MONTH?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  SECONDS?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  WEEK?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  YEAR?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export interface JwtScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['JWT'], any> {
+  name: 'JWT';
+}
+
 export type LocalUserDetailsResolvers<ContextType = Context, ParentType extends ResolversParentTypes['LocalUserDetails'] = ResolversParentTypes['LocalUserDetails']> = ResolversObject<{
   about?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   address?: Resolver<Maybe<ResolversTypes['Address']>, ParentType, ContextType>;
   first_name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   image?: Resolver<Maybe<ResolversTypes['Media']>, ParentType, ContextType>;
   last_name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  phone?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  phone?: Resolver<Maybe<ResolversTypes['PhoneNumber']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -534,7 +724,8 @@ export type MembershipResolvers<ContextType = Context, ParentType extends Resolv
 }>;
 
 export type MutationResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
-  deleteUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationDeleteUserArgs, 'deleteUserInput'>>;
+  createUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationCreateUserArgs, 'createUserInput'>>;
+  deleteUsers?: Resolver<ResolversTypes['DeleteResponse'], ParentType, ContextType, RequireFields<MutationDeleteUsersArgs, 'deleteUsersInput'>>;
   inviteUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationInviteUserArgs, 'inviteUserInput'>>;
   loginUser?: Resolver<ResolversTypes['LoginUserResponse'], ParentType, ContextType>;
   switchUserMembership?: Resolver<ResolversTypes['LoginUserResponse'], ParentType, ContextType, RequireFields<MutationSwitchUserMembershipArgs, 'switchUserMembershipInput'>>;
@@ -543,6 +734,14 @@ export type MutationResolvers<ContextType = Context, ParentType extends Resolver
 
 export interface ObjectIdScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['ObjectID'], any> {
   name: 'ObjectID';
+}
+
+export interface PhoneNumberScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['PhoneNumber'], any> {
+  name: 'PhoneNumber';
+}
+
+export interface PostalCodeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['PostalCode'], any> {
+  name: 'PostalCode';
 }
 
 export type QueryResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
@@ -554,6 +753,7 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
 
 export type StatsResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Stats'] = ResolversParentTypes['Stats']> = ResolversObject<{
   cursor?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  history?: Resolver<Maybe<Array<ResolversTypes['HistoricStats']>>, ParentType, ContextType>;
   page?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   remaining?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   total?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
@@ -566,12 +766,12 @@ export type UserResolvers<ContextType = Context, ParentType extends ResolversPar
   address?: Resolver<Maybe<ResolversTypes['Address']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   created_by?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
-  email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  email?: Resolver<ResolversTypes['EmailAddress'], ParentType, ContextType>;
   first_name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   image?: Resolver<Maybe<ResolversTypes['Media']>, ParentType, ContextType>;
   last_name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   memberships?: Resolver<Array<ResolversTypes['Membership']>, ParentType, ContextType>;
-  phone?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  phone?: Resolver<Maybe<ResolversTypes['PhoneNumber']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -589,25 +789,49 @@ export type _ServiceResolvers<ContextType = Context, ParentType extends Resolver
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export interface Federation__FieldSetScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['federation__FieldSet'], any> {
+  name: 'federation__FieldSet';
+}
+
+export interface Link__ImportScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['link__Import'], any> {
+  name: 'link__Import';
+}
+
 export type Resolvers<ContextType = Context> = ResolversObject<{
   Account?: AccountResolvers<ContextType>;
   Address?: AddressResolvers<ContextType>;
+  CountryCode?: GraphQLScalarType;
   DateTime?: GraphQLScalarType;
+  DeleteResponse?: DeleteResponseResolvers<ContextType>;
+  EmailAddress?: GraphQLScalarType;
   GetUsersResponse?: GetUsersResponseResolvers<ContextType>;
+  HistoricStats?: HistoricStatsResolvers<ContextType>;
+  HistoricStatsId?: HistoricStatsIdResolvers<ContextType>;
+  JWT?: GraphQLScalarType;
   LocalUserDetails?: LocalUserDetailsResolvers<ContextType>;
   LoginUserResponse?: LoginUserResponseResolvers<ContextType>;
   Media?: MediaResolvers<ContextType>;
   Membership?: MembershipResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   ObjectID?: GraphQLScalarType;
+  PhoneNumber?: GraphQLScalarType;
+  PostalCode?: GraphQLScalarType;
   Query?: QueryResolvers<ContextType>;
   Stats?: StatsResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
   _Any?: GraphQLScalarType;
   _Entity?: _EntityResolvers<ContextType>;
   _Service?: _ServiceResolvers<ContextType>;
+  federation__FieldSet?: GraphQLScalarType;
+  link__Import?: GraphQLScalarType;
 }>;
 
 export type DirectiveResolvers<ContextType = Context> = ResolversObject<{
-  extends?: ExtendsDirectiveResolver<any, any, ContextType>;
+  federation__extends?: Federation__ExtendsDirectiveResolver<any, any, ContextType>;
+  federation__inaccessible?: Federation__InaccessibleDirectiveResolver<any, any, ContextType>;
+  federation__override?: Federation__OverrideDirectiveResolver<any, any, ContextType>;
+  federation__provides?: Federation__ProvidesDirectiveResolver<any, any, ContextType>;
+  federation__tag?: Federation__TagDirectiveResolver<any, any, ContextType>;
+  link?: LinkDirectiveResolver<any, any, ContextType>;
+  shareable?: ShareableDirectiveResolver<any, any, ContextType>;
 }>;

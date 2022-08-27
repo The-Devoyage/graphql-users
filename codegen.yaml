@@ -4,7 +4,14 @@ generates:
     config:
       useIndexSignature: true
       federation: true
-      contextType: "@the-devoyage/micro-auth-helpers#Context"
+      contextType: "../context#Context"
+      scalars:
+        DateTime: Date
+        ObjectID: string
+        EmailAddress: string
+        PhoneNumber: string
+        CountryCode: string
+        PostalCode: string
     plugins:
       - typescript
       - typescript-resolvers
