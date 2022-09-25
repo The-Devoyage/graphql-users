@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [v0.3.1]
+- Allow membership holders to edit membership details.
+- No user found bug fix. 
+
 ## [v0.3.0]
 
 ### Added

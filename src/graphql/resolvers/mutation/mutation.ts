@@ -407,19 +407,29 @@ export const Mutation: MutationResolvers = {
 
       const user = await User.findOne<IUser>(filter);
 
-      if (user?._id.toString() !== context.auth.payload.user?._id.toString()) {
-        Helpers.Resolver.LimitRole({
-          userRole: context.auth.payload?.user?.role,
-          roleLimit: 1,
-          errorMessage: "Only admins and owners may edit user details.",
-        });
-      }
-
       if (!user) {
         throw new Error("User does not exist.");
       }
 
-      await updateMembership(args.updateUserInput, context);
+      let shouldUpdateMembership = true;
+
+      if (user?._id.toString() !== context.auth.payload.user?._id.toString()) {
+        const payloadKeys = Object.keys(args.updateUserInput.payload);
+
+        if (payloadKeys.length === 1 && payloadKeys[0] === "memberships") {
+          await updateMembership(args.updateUserInput, context);
+          shouldUpdateMembership = false;
+        } else {
+          Helpers.Resolver.LimitRole({
+            userRole: context.auth.payload?.user?.role,
+            roleLimit: 1,
+            errorMessage: "Only admins and owners may edit user details.",
+          });
+        }
+      }
+
+      shouldUpdateMembership &&
+        (await updateMembership(args.updateUserInput, context));
 
       delete args.updateUserInput.payload.memberships;
 
