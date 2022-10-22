@@ -129,7 +129,14 @@ UserSchema.post(
       next(
         new ApolloError(
           "A user with this email already exists.",
-          "DUPLICATE_USER"
+          "DUPLICATE_USER",
+          {
+            errors: {
+              payload: {
+                email: "A user with this email already exists.",
+              },
+            },
+          }
         )
       );
     } else {
@@ -139,13 +146,20 @@ UserSchema.post(
 );
 
 UserSchema.post(
-  "update",
+  "findOneAndUpdate",
   function (error: Partial<Error>, _: User, next: NextFunction) {
     if (error.code === 11000 && error.name === "MongoServerError") {
       next(
         new ApolloError(
           "A user with this email already exists.",
-          "DUPLICATE_USER"
+          "DUPLICATE_USER",
+          {
+            errors: {
+              payload: {
+                email: "A user with this email already exists.",
+              },
+            },
+          }
         )
       );
     } else {

@@ -9,6 +9,7 @@ import {
 import { Helpers } from "@the-devoyage/micro-auth-helpers";
 import { updateMembership } from "./update-membership";
 import { GenerateMongo } from "@the-devoyage/mongo-filter-generator";
+import { ApolloError } from "apollo-server";
 
 export const Mutation: MutationResolvers = {
   createUser: async (_, args, context) => {
@@ -350,7 +351,17 @@ export const Mutation: MutationResolvers = {
       );
 
       if (membership) {
-        throw new Error("This user has already been invited to this account.");
+        throw new ApolloError(
+          "This user has already been invited to this account.",
+          "USER_EXISTS",
+          {
+            errors: {
+              query: {
+                _id: "This user has already been invited to this account.",
+              },
+            },
+          }
+        );
       }
 
       const { account, role, local, status } =
@@ -369,7 +380,7 @@ export const Mutation: MutationResolvers = {
           payload: {
             memberships: {
               role: role ?? 100,
-              account: account ?? context.auth.payload.account?._id!,
+              account: account ?? (context.auth.payload.account?._id as string),
               status: status ?? ("PENDING" as MembershipStatusEnum),
               local: {
                 about: local?.about,

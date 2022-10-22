@@ -1,6 +1,8 @@
 # Changelog
 
-## [Unreleased]
+## [v0.3.2]
+- Model Schema Post Hook Fixed - Changed to `findOneAndUpdate` to catch duplicate key errors when updating documents.
+- Invite User - Converted "membership exists" error handler to Apollo Error.
 
 ## [v0.3.1]
 - Allow membership holders to edit membership details.
