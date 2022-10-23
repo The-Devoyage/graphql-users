@@ -57,19 +57,11 @@ Memberships allow users to share assets within your API. The required login para
 
 ### Install Dependencies
 
-1. Login to the Github registry with NPM.
-
-```
-npm login --registry=https://npm.pkg.github.com
-```
-
-2. Install Dependencies
+Install with NPM
 
 ```
 npm install
 ```
-
-If you are using docker to build and run this server, you will need to pass a github token along to the build process as a build arg.
 
 ### Configure Environment Variables
 
