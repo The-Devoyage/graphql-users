@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.3.3]
+- Remove requirements for Git Hub Personal Access Tokens
+
 ## [v0.3.2]
 - Model Schema Post Hook Fixed - Changed to `findOneAndUpdate` to catch duplicate key errors when updating documents.
 - Invite User - Converted "membership exists" error handler to Apollo Error.
