@@ -1,10 +1,22 @@
 # Changelog
 
+## [v0.3.3]
+
+### Changed
+
+- Remove requirement for GitHub PAT in non-docker builds.
+
 ## [v0.3.2]
+
+### Changed
+
 - Model Schema Post Hook Fixed - Changed to `findOneAndUpdate` to catch duplicate key errors when updating documents.
 - Invite User - Converted "membership exists" error handler to Apollo Error.
 
 ## [v0.3.1]
+
+### Changed 
+
 - Allow membership holders to edit membership details.
 - No user found bug fix. 
 
